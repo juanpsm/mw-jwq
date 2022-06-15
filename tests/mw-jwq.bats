@@ -2,8 +2,20 @@
 load test_helper
 fixtures mw-jwq
 
-@test "invoking mw-jwq with no parameters shows Usage" {
+@test "invoking mw-jwq with no mandatory parameters shows Usage" {
   run ./mw-jwq
+  [ $status -eq 1 ]
+  [ $(expr "${lines[1]}" : "Usage:") -ne 0 ]
+
+  run ./mw-jwq -c
+  [ $status -eq 1 ]
+  [ $(expr "${lines[1]}" : "Usage:") -ne 0 ]
+
+  run ./mw-jwq -v
+  [ $status -eq 1 ]
+  [ $(expr "${lines[1]}" : "Usage:") -ne 0 ]
+
+  run ./mw-jwq -v -c
   [ $status -eq 1 ]
   [ $(expr "${lines[1]}" : "Usage:") -ne 0 ]
 }

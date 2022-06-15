@@ -5,18 +5,29 @@
 set -Eeuo pipefail
 trap cleanup SIGINT SIGTERM ERR EXIT
 
-script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
+VERSION="0.1.0"
 
-# default values of variables set from params
-  NO_COLOR=''
-  FILE=''
-  DEBUG=''
-  RAW='split(".") | .[0],.[1] | @base64d | fromjson'
-  
+NO_COLOR=''
+FILE=''
+DEBUG=''
+RAW='split(".") | .[0],.[1] | @base64d | fromjson'
+
+version() {
+  echo "mw-jwq v$VERSION"
+}
+
 usage() {
   cat <<EOF
-Usage: $(basename "${BASH_SOURCE[0]}") [-h] [-v] [-c] ( -f FILE | STRING )
 
+$(version) 
+
+Usage: $(basename "${BASH_SOURCE[0]}") [-V] [-h] [-v] [-c] ( -f FILE | STRING )"
+EOF
+}
+
+help() {
+  cat <<EOF
+$(usage)
 Wrapper for: ( cat FILE / echo STRING ) | jq -R '${RAW}'
 
 Available options:
@@ -28,7 +39,6 @@ Available options:
 -vv, --hyper-verbose  More debug info (set -x)
 
 EOF
-  exit 0
 }
 
 cleanup() {
@@ -56,11 +66,12 @@ die() {
 }
 
 parse_params() {
-  [[ $# -eq 0 ]] && usage
+  [[ $# -eq 0 ]] && usage && exit 1
 
   while :; do
     case "${1-}" in
-    -h  | --help) usage ;;
+    -V  | --version) version ; exit 0 ;;
+    -h  | --help) help ; exit 0 ;;
     -v  | --verbose) DEBUG=1 ;;               # flags
     -vv | --hyper-verbose) DEBUG=1; set -x ;; 
     -c  | --no-color) NO_COLOR=1 ;;
@@ -77,6 +88,9 @@ parse_params() {
   done
 
   args=("$@")
+  STRING=$(IFS= ; echo "${args[*]}")
+
+  [[ -z "$STRING" ]] && [[ -z "$FILE" ]] && usage && die "Missing argument: STRING or FILE"
 
   return 0
 }
@@ -95,6 +109,7 @@ if [ -n "$FILE" ]; then
   PRINT="cat $FILE"
 else
   STRING=$(IFS= ; echo "${args[*]}")
+  msg "JWT: '$STRING'"
   PRINT="echo $STRING"
 fi
 
@@ -104,4 +119,4 @@ if [ -n "${DEBUG}" ]; then
   msg "${GREEN}>>  $CMD${NOFORMAT}"
 fi
 
-eval $CMD
+eval "$CMD"
