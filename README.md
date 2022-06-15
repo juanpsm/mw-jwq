@@ -6,7 +6,7 @@ Tested only with [jq-1.6](https://stedolan.github.io/jq/), Zsh 5.8, and bash 5.1
 
 ## Install
 
-Download to some location un your `$PATH` and give it permisions:
+Download to some location in your `$PATH` and give it permissions:
 
 ```console
 curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.1.0/mw-jwq > $HOME/.local/bin/mw-jwq
@@ -20,8 +20,8 @@ The script has it own usage and help incorporated, check it out ✌️
 
 ## TDD
 
-This script was tested with [bats](). To run them, first install it
-[following their instructions](),
+This script was tested with [bats](https://github.com/sstephenson/bats). To run them, first install it
+[following their instructions](https://github.com/sstephenson/bats#installing-bats-from-source),
 then:
 
 ```console
