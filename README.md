@@ -67,3 +67,4 @@ bats tests
   * Investigate about the color code to test without `-c` parameter
 * Multiple file support?
 * Use more colorful help and messages. The colours are already defined! 🌈
+* **Add [Github Actions!!](https://docs.github.com/en/actions)**
