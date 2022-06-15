@@ -66,3 +66,4 @@ bats tests
   * Test `-v` parameter and other combinations.
   * Investigate about the color code to test without `-c` parameter
 * Multiple file support?
+* Use more colorful help and messages. The colours are already defined! 🌈
