@@ -17,6 +17,6 @@ jobs:
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - run: whoami
       - name: Install bats
-        run: git clone https://github.com/sstephenson/bats.git && cd bats && ./install.sh /usr/local
+        run: git clone https://github.com/sstephenson/bats.git && cd bats && ./install.sh $HOME/.local
       - name: Run tests
         run: bats ${{ github.workspace }}/tests
