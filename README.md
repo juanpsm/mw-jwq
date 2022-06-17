@@ -1,7 +1,12 @@
+
+[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fjuanpsm%2Fmw-jwq%2Fbadge%3Fref%3Dmain&style=for-the-badge)](https://actions-badge.atrox.dev/juanpsm/mw-jwq/goto?ref=main)
+
 # mw-jwq
+
 Wrapper for decripting *JSON Web Tokens* using `jq`
 
 ## Requirements
+
 Tested only with [jq-1.6](https://stedolan.github.io/jq/), Zsh 5.8, and bash 5.1.8
 
 ## Install
@@ -14,6 +19,7 @@ chmod +x $HOME/.local/bin/mw-jwq
 
 mw-jwq -h
 ```
+
 ## Usage
 
 The script has it own usage and help incorporated, check it out ✌️
@@ -67,4 +73,4 @@ bats tests
   * Investigate about the color code to test without `-c` parameter
 * Multiple file support?
 * Use more colorful help and messages. The colours are already defined! 🌈
-* **Add [Github Actions!!](https://docs.github.com/en/actions)**
+* ~~Add [Github Actions!!](https://docs.github.com/en/actions)~~
