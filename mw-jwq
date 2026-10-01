@@ -107,7 +107,8 @@ fi
 
 # Read the input and split it into tokens. Whitespace is dropped. A token may
 # span several lines, and a new one starts at a line beginning with a header
-# ("eyJ") once the current one has its 3 dot separated parts.
+# (a base64url "{", i.e. "ey" or "ew") once the current one has its 3 dot
+# separated parts.
 if [ -n "$FILE" ]; then
   INPUT=$(cat -- "$FILE")
 else
@@ -121,7 +122,7 @@ BUFFER=''
 while IFS= read -r line || [[ -n "$line" ]]; do
   line=$(tr -d '[:space:]' <<<"$line")
   [[ -z "$line" ]] && continue
-  if [[ "$BUFFER" == *.*.* && "$line" == eyJ* ]]; then
+  if [[ "$BUFFER" == *.*.* && "$line" =~ ^e[wy] ]]; then
     TOKENS+=("$BUFFER")
     BUFFER=''
   fi

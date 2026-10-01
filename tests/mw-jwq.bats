@@ -316,6 +316,14 @@ fixtures mw-jwq
   [ "${lines[1]}" = "{" ]
 }
 
+@test "-c -f second token with whitespace in header json" {
+  printf 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.abc\n%s.eyJzdWIiOiIxMjM0NTY3ODkwIn0.abc\n' \
+    "$(printf '{ "alg":"HS256"}' | base64 -w0 | tr '+/' '-_' | tr -d =)" > "$BATS_TEST_TMPDIR/spaced_header.jwt"
+  run ./mw-jwq -c -f "$BATS_TEST_TMPDIR/spaced_header.jwt"
+  [ $status -eq 0 ]
+  [ "$(grep -c '"alg"' <<<"$output")" -eq 2 ]
+}
+
 @test "Test color" {
   skip "TODO: Cant test color, dont know the codification"
   run ./mw-jwq -f "$FIXTURE_ROOT/single_line.jwt"
