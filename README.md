@@ -166,7 +166,7 @@ bats tests
 
 ## TODO
 
-* ~~Fix skipped tests, either implement fixes or accept defeat.~~ (only the color test remains skipped)
+* ~~Fix skipped tests, either implement fixes or accept defeat.~~
 * ~~More tests: `-v` and other combinations, color output without `-c`.~~
 * ~~Multiple file support?~~ Not needed: a file (or stdin) can hold several codes, one per line. Stdin is supported instead.
 * ~~Use more colorful help and messages. The colours are already defined! 🌈~~
