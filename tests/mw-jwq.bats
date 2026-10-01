@@ -343,7 +343,7 @@ b64url() {
 
 @test "-h lists every option" {
   run ./mw-jwq -h
-  for opt in -h --help -V --version -f --file -c --no-color -v --verbose -vv --hyper-verbose; do
+  for opt in -h --help -V --version -f --file -c --no-color --color -v --verbose -vv --hyper-verbose; do
     [[ "$output" == *"$opt"* ]]
   done
 }
@@ -459,7 +459,7 @@ c.d.e"
 }
 
 @test "options after the string are part of the string, not options" {
-  run ./mw-jwq "$H.$P.s" -c
+  run ./mw-jwq --color=always "$H.$P.s" -c
   [ "${lines[0]}" = "JWT: '$H.$P.s-c'" ]
   [[ "$output" == *$'\e['* ]]
 }
@@ -547,10 +547,82 @@ c.d.e"
   [[ "$output" != *$'\e['* ]]
 }
 
-@test "color output has ANSI escapes when -c is not given" {
+@test "color: auto (default) has no ANSI escapes when stdout is not a terminal" {
   run ./mw-jwq -f "$FIXTURE_ROOT/single_line.jwt"
   [ $status -eq 0 ]
+  [[ "$output" != *$'\e['* ]]
+}
+
+@test "color: piped output can be consumed by jq without -c" {
+  run bash -c "./mw-jwq -f '$FIXTURE_ROOT/single_line.jwt' 2>/dev/null | jq -c ."
+  [ $status -eq 0 ]
+  [ "${lines[0]}" = '{"alg":"HS256","typ":"JWT"}' ]
+}
+
+@test "color: --color=always has ANSI escapes even when piped" {
+  run ./mw-jwq --color=always -f "$FIXTURE_ROOT/single_line.jwt"
+  [ $status -eq 0 ]
   [[ "$output" == *$'\e['* ]]
+}
+
+@test "color: --color without a value means always" {
+  run ./mw-jwq --color -f "$FIXTURE_ROOT/single_line.jwt"
+  [[ "$output" == *$'\e['* ]]
+}
+
+@test "color: --color=auto behaves as the default" {
+  run ./mw-jwq --color=auto -f "$FIXTURE_ROOT/single_line.jwt"
+  [[ "$output" != *$'\e['* ]]
+}
+
+@test "color: --color=never has no ANSI escapes" {
+  run ./mw-jwq --color=never -f "$FIXTURE_ROOT/single_line.jwt"
+  [[ "$output" != *$'\e['* ]]
+}
+
+@test "color: invalid --color value fails" {
+  run ./mw-jwq --color=sometimes -f "$FIXTURE_ROOT/single_line.jwt"
+  [ $status -eq 1 ]
+  [[ "$output" == *"Invalid value for --color: 'sometimes'"* ]]
+}
+
+@test "color: the last of -c and --color wins" {
+  run ./mw-jwq --color=always -c -f "$FIXTURE_ROOT/single_line.jwt"
+  [[ "$output" != *$'\e['* ]]
+  run ./mw-jwq -c --color=always -f "$FIXTURE_ROOT/single_line.jwt"
+  [[ "$output" == *$'\e['* ]]
+}
+
+@test "color: --color=always overrides NO_COLOR" {
+  NO_COLOR=1 run ./mw-jwq --color=always -f "$FIXTURE_ROOT/single_line.jwt"
+  [[ "$output" == *$'\e['* ]]
+}
+
+@test "color: terminal gets color by default" {
+  command -v script >/dev/null || skip "script(1) not available"
+  run script -qec "./mw-jwq -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  [ $status -eq 0 ]
+  [[ "$output" == *$'\e['* ]]
+}
+
+@test "color: terminal with -c, --color=never, NO_COLOR or TERM=dumb has none" {
+  command -v script >/dev/null || skip "script(1) not available"
+  run script -qec "./mw-jwq -c -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  [[ "$output" != *$'\e['* ]]
+  run script -qec "./mw-jwq --color=never -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  [[ "$output" != *$'\e['* ]]
+  NO_COLOR=1 run script -qec "./mw-jwq -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  [[ "$output" != *$'\e['* ]]
+  TERM=dumb run script -qec "./mw-jwq -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  [[ "$output" != *$'\e['* ]]
+}
+
+@test "color: verbose command line is colored on a terminal" {
+  command -v script >/dev/null || skip "script(1) not available"
+  run script -qec "./mw-jwq -v -c -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  [[ "$output" != *$'\e['* ]]
+  run script -qec "./mw-jwq -v -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  [[ "$output" == *$'\e[0;32m>>'* ]]
 }
 
 @test "-c output has no ANSI escapes" {
@@ -558,7 +630,7 @@ c.d.e"
   [[ "$output" != *$'\e['* ]]
 }
 
-@test "NO_COLOR environment variable disables color" {
+@test "NO_COLOR is honored in auto mode without a terminal too" {
   NO_COLOR=1 run ./mw-jwq -f "$FIXTURE_ROOT/single_line.jwt"
   [ $status -eq 0 ]
   [[ "$output" != *$'\e['* ]]
@@ -589,8 +661,8 @@ c.d.e"
   [ "$(grep -c '"alg"' <<<"$output")" -eq 2 ]
 }
 
-@test "stdin: color is on when -c is not given" {
-  run bash -c "printf '%s.%s.s\n' '$H' '$P' | ./mw-jwq"
+@test "stdin: --color=always colors the output" {
+  run bash -c "printf '%s.%s.s\n' '$H' '$P' | ./mw-jwq --color=always"
   [ $status -eq 0 ]
   [[ "$output" == *$'\e['* ]]
 }
