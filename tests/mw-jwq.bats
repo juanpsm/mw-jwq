@@ -333,10 +333,225 @@ fixtures mw-jwq
   [ "$(grep -c '"alg"' <<<"$output")" -eq 2 ]
 }
 
-@test "Test color" {
-  skip "TODO: Cant test color, dont know the codification"
+H=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+P=eyJzdWIiOiIxMjM0NTY3ODkwIn0
+B64URL_UNSAFE='{"a":"??>>~~"}'
+
+b64url() {
+  printf '%s' "$1" | base64 -w0 | tr '+/' '-_' | tr -d =
+}
+
+@test "-h lists every option" {
+  run ./mw-jwq -h
+  for opt in -h --help -V --version -f --file -c --no-color -v --verbose -vv --hyper-verbose; do
+    [[ "$output" == *"$opt"* ]]
+  done
+}
+
+@test "-c base64url alphabet (- and _) is decoded" {
+  run ./mw-jwq -c "$(b64url "$B64URL_UNSAFE").$P.s"
+  [ $status -eq 0 ]
+  [[ "$output" == *'"a": "??>>~~"'* ]]
+}
+
+@test "-c unicode payload" {
+  run ./mw-jwq -c "$H.$(b64url '{"n":"ñandú ✓"}').s"
+  [ $status -eq 0 ]
+  [[ "$output" == *'"n": "ñandú ✓"'* ]]
+}
+
+@test "-c token without signature (trailing dot)" {
+  run ./mw-jwq -c "$H.$P."
+  [ $status -eq 0 ]
+  [[ "$output" == *'"sub": "1234567890"'* ]]
+}
+
+@test "-c -f CRLF line endings" {
+  printf '%s.%s.s\r\n%s.%s.s\r\n' "$H" "$P" "$H" "$P" > "$BATS_TEST_TMPDIR/crlf.jwt"
+  run ./mw-jwq -c -f "$BATS_TEST_TMPDIR/crlf.jwt"
+  [ $status -eq 0 ]
+  [ "$(grep -c '"alg"' <<<"$output")" -eq 2 ]
+}
+
+@test "-c -f tabs around and inside the code" {
+  printf '\t%s.%s\t.s\t\n' "$H" "$P" > "$BATS_TEST_TMPDIR/tabs.jwt"
+  run ./mw-jwq -c -f "$BATS_TEST_TMPDIR/tabs.jwt"
+  [ $status -eq 0 ]
+  [ "$(grep -c '"alg"' <<<"$output")" -eq 1 ]
+}
+
+@test "-c -f three codes separated by empty lines" {
+  printf '%s.%s.s\n\n%s.%s.s\n\n\n%s.%s.s\n' "$H" "$P" "$H" "$P" "$H" "$P" > "$BATS_TEST_TMPDIR/three.jwt"
+  run ./mw-jwq -c -f "$BATS_TEST_TMPDIR/three.jwt"
+  [ $status -eq 0 ]
+  [ "$(grep -c '"alg"' <<<"$output")" -eq 3 ]
+}
+
+@test "-c -f file with only whitespace runs w/o output" {
+  printf ' \n\t\n  \n' > "$BATS_TEST_TMPDIR/blank.jwt"
+  run ./mw-jwq -c -f "$BATS_TEST_TMPDIR/blank.jwt"
+  [ $status -eq 0 ]
+  [ "$output" = "" ]
+}
+
+@test "-c string with only whitespace shows Usage" {
+  run ./mw-jwq -c "   "
+  [ $status -eq 1 ]
+  [[ "$output" == *"Missing argument"* ]]
+}
+
+@test "-c multi line string with several codes" {
+  run ./mw-jwq -c "$H.$P.s
+$H.$P.s"
+  [ $status -eq 0 ]
+  [ "$(grep -c '"alg"' <<<"$output")" -eq 2 ]
+}
+
+@test "-c second code invalid: first is decoded and status is 5" {
+  run ./mw-jwq -c "$H.$P.s
+zzz.zzz.zzz"
+  [ $status -eq 5 ]
+  [[ "$output" == *'"alg"'* ]]
+}
+
+@test "-c first code invalid: second is still decoded and status is 5" {
+  run ./mw-jwq -c "$(b64url 'not json').$P.s
+$H.$P.s"
+  [ $status -eq 5 ]
+  [[ "$output" == *'"alg"'* ]]
+}
+
+@test "-c payload that is not JSON fails" {
+  run ./mw-jwq -c "$H.$(b64url 'notjson').s"
+  [ $status -eq 5 ]
+}
+
+@test "-c invalid base64 characters fail" {
+  run ./mw-jwq -c 'a!b.c@d.e'
+  [ $status -eq 5 ]
+}
+
+@test "-c string without dots fails" {
+  run ./mw-jwq -c abc
+  [ $status -eq 5 ]
+}
+
+@test "-c codes with only two parts fail" {
+  run ./mw-jwq -c "$H.$P
+$H.$P"
+  [ $status -eq 5 ]
+}
+
+@test "-c code with too many parts fails" {
+  run ./mw-jwq -c "a.b
+c.d.e"
+  [ $status -eq 5 ]
+  [[ "$output" == *"too many parts"* ]]
+}
+
+@test "options after the string are part of the string, not options" {
+  run ./mw-jwq "$H.$P.s" -c
+  [ "${lines[0]}" = "JWT: '$H.$P.s-c'" ]
+  [[ "$output" == *$'\e['* ]]
+}
+
+@test "-- ends options" {
+  run ./mw-jwq -c -- "$H.$P.s"
+  [ $status -eq 0 ]
+  [[ "$output" == *'"alg"'* ]]
+}
+
+@test "-f after -c and before the file works in any order" {
+  run ./mw-jwq -f "$FIXTURE_ROOT/single_line.jwt" -c
+  [ $status -eq 0 ]
+  [[ "$output" == *'"alg": "HS256"'* ]]
+}
+
+@test "-f and STRING together are rejected" {
+  run ./mw-jwq -c -f "$FIXTURE_ROOT/single_line.jwt" "$H.$P.s"
+  [ $status -eq 1 ]
+  [[ "$output" == *"not both"* ]]
+}
+
+@test "-f directory is rejected" {
+  run ./mw-jwq -f "$FIXTURE_ROOT"
+  [ $status -eq 1 ]
+}
+
+@test "-f without argument fails" {
+  run ./mw-jwq -f
+  [ $status -eq 1 ]
+  [[ "$output" == *"Missing argument for option '-f'"* ]]
+}
+
+@test "unknown option fails" {
+  run ./mw-jwq -x
+  [ $status -eq 1 ]
+  [[ "$output" == *"Unknown option: -x"* ]]
+}
+
+@test "shell metacharacters in the string are not executed" {
+  run ./mw-jwq -c "$H.$P.s';touch $BATS_TEST_TMPDIR/pwned;'"
+  [ $status -eq 0 ]
+  [ ! -e "$BATS_TEST_TMPDIR/pwned" ]
+}
+
+@test "backslashes in the string are echoed literally" {
+  run ./mw-jwq -c "$H.$P.s\\n"
+  [ "${lines[0]}" = "JWT: '$H.$P.s\\n'" ]
+}
+
+@test "the JWT echo goes to stderr, the decoded JSON to stdout" {
+  run bash -c "./mw-jwq -c '$H.$P.s' 2>/dev/null"
+  [ $status -eq 0 ]
+  [ "${lines[0]}" = "{" ]
+}
+
+@test "-v prints the jq command" {
+  run ./mw-jwq -v -c "$H.$P.s"
+  [ $status -eq 0 ]
+  [[ "$output" == *">>  jq -R"* ]]
+}
+
+@test "without -v the jq command is not printed" {
+  run ./mw-jwq -c "$H.$P.s"
+  [[ "$output" != *">>"* ]]
+}
+
+@test "-vv traces the script" {
+  run ./mw-jwq -vv -c "$H.$P.s"
+  [ $status -eq 0 ]
+  [[ "$output" == *"+ "* ]]
+  [[ "$output" == *">>  jq -R"* ]]
+}
+
+@test "--verbose and --hyper-verbose are aliases" {
+  run ./mw-jwq --verbose -c "$H.$P.s"
+  [[ "$output" == *">>  jq -R"* ]]
+  run ./mw-jwq --hyper-verbose -c "$H.$P.s"
+  [[ "$output" == *"+ "* ]]
+}
+
+@test "--no-color is an alias of -c" {
+  run ./mw-jwq --no-color -f "$FIXTURE_ROOT/single_line.jwt"
+  [ $status -eq 0 ]
+  [[ "$output" != *$'\e['* ]]
+}
+
+@test "color output has ANSI escapes when -c is not given" {
   run ./mw-jwq -f "$FIXTURE_ROOT/single_line.jwt"
   [ $status -eq 0 ]
-  [ $(expr "${lines[1]}" : "\\033\[1;39m\{") ]
-
+  [[ "$output" == *$'\e['* ]]
 }
+
+@test "-c output has no ANSI escapes" {
+  run ./mw-jwq -c -f "$FIXTURE_ROOT/single_line.jwt"
+  [[ "$output" != *$'\e['* ]]
+}
+
+@test "NO_COLOR environment variable disables color" {
+  NO_COLOR=1 run ./mw-jwq -f "$FIXTURE_ROOT/single_line.jwt"
+  [ $status -eq 0 ]
+  [[ "$output" != *$'\e['* ]]
+}
+
