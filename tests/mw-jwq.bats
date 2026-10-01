@@ -88,7 +88,6 @@ fixtures mw-jwq
 }
 
 @test "-c -f file with preceding spaces" {
-  skip "TODO: trim spaces"
   run ./mw-jwq -c -f "$FIXTURE_ROOT/preceding_space.jwt"
   [ $status -eq 0 ]
   echo "${lines[2]}"
@@ -104,7 +103,6 @@ fixtures mw-jwq
 }
 
 @test "-c -f file with spaces in between" {
-  skip "TODO: trim spaces"
   run ./mw-jwq -c -f "$FIXTURE_ROOT/in_between_space.jwt"
   [ $status -eq 0 ]
   echo "${lines[2]}"
@@ -135,7 +133,6 @@ fixtures mw-jwq
 }
 
 @test "-c -f file with multiple trailing empty lines" {
-  skip "TODO: trim empty lines"
   run ./mw-jwq -c -f "$FIXTURE_ROOT/tailing_empty_lines.jwt"
   [ $status -eq 0 ]
   echo "${lines[2]}"
@@ -151,7 +148,6 @@ fixtures mw-jwq
 }
 
 @test "-c -f file with preceding empty line" {
-  skip "TODO: trim empty lines"
   run ./mw-jwq -c -f "$FIXTURE_ROOT/preceding_single_empty_line.jwt"
   [ $status -eq 0 ]
   echo "${lines[2]}"
@@ -167,7 +163,6 @@ fixtures mw-jwq
 }
 
 @test "-c -f file with multiple preceding empty lines" {
-  skip "TODO: trim empty lines"
   run ./mw-jwq -c -f "$FIXTURE_ROOT/preceding_empty_lines.jwt"
   [ $status -eq 0 ]
   echo "${lines[2]}"
@@ -207,7 +202,6 @@ fixtures mw-jwq
 }
 
 @test "-c -f multi line code" {
-  skip "TODO? not yet implemented"
   run ./mw-jwq -c -f "$FIXTURE_ROOT/multi_line.jwt"
   [ $status -eq 0 ]
   echo "${lines[2]}"
@@ -223,7 +217,6 @@ fixtures mw-jwq
 }
 
 @test "-c -f file name with space ok" {
-  skip "TODO? not yet implemented"
   run ./mw-jwq -c -f "$FIXTURE_ROOT/name with space.jwt"
   [ $status -eq 0 ]
   echo -e "${lines[2]}"
@@ -319,7 +312,8 @@ fixtures mw-jwq
   run ./mw-jwq -c "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
   eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.
   SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-  [ $status -eq 127 ]
+  [ $status -eq 0 ]
+  [ "${lines[1]}" = "{" ]
 }
 
 @test "Test color" {
