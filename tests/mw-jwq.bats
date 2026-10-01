@@ -871,3 +871,33 @@ $H.$P.s"
   run bash -c "./mw-jwq -v -c < '$FIXTURE_ROOT/single_line.jwt'"
   [[ "$output" != *"JWT: '"* ]]
 }
+
+@test "-f accepts process substitution" {
+  run ./mw-jwq -c -f <(printf '%s.%s.s\n' "$H" "$P")
+  [ $status -eq 0 ]
+  [[ "$output" == *'"alg"'* ]]
+}
+
+@test "-f accepts /dev/stdin and /dev/null" {
+  run bash -c "printf '%s.%s.s\n' '$H' '$P' | ./mw-jwq -c -f /dev/stdin"
+  [ $status -eq 0 ]
+  [[ "$output" == *'"alg"'* ]]
+  run ./mw-jwq -c -f /dev/null
+  [ $status -eq 0 ]
+  [ "$output" = "" ]
+}
+
+@test "-f directory says it is a directory" {
+  run ./mw-jwq -f "$FIXTURE_ROOT"
+  [ $status -eq 1 ]
+  [[ "$output" == *"is a directory"* ]]
+}
+
+@test "-f unreadable file says it is not readable" {
+  [ "$(id -u)" -ne 0 ] || skip "root can read any file"
+  : > "$BATS_TEST_TMPDIR/secret.jwt"
+  chmod 000 "$BATS_TEST_TMPDIR/secret.jwt"
+  run ./mw-jwq -f "$BATS_TEST_TMPDIR/secret.jwt"
+  [ $status -eq 1 ]
+  [[ "$output" == *"is not readable"* ]]
+}

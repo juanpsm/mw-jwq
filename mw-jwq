@@ -5,7 +5,7 @@
 set -Eeuo pipefail
 trap cleanup SIGINT SIGTERM ERR EXIT
 
-VERSION="0.7.0"
+VERSION="0.7.1"
 
 COLOR_MODE=auto # auto | always | never
 NOFORMAT='' RED='' GREEN='' ORANGE='' BLUE='' PURPLE='' CYAN='' YELLOW='' BOLD='' ENDB=''
@@ -117,7 +117,11 @@ parse_params() {
     -f  | --file)                             # named parameters
       FILE="${2-}"
       [[ -z "$FILE" ]] && die "Missing argument for option '$1'"
-      [[ "$FILE" != - && ! -f "$FILE" ]] && die "File '$FILE' does not exist"
+      if [[ "$FILE" != - ]]; then
+        [[ ! -e "$FILE" ]] && die "File '$FILE' does not exist"
+        [[ -d "$FILE" ]] && die "'$FILE' is a directory"
+        [[ ! -r "$FILE" ]] && die "File '$FILE' is not readable"
+      fi
       shift
       ;;
     --) shift; break ;;
