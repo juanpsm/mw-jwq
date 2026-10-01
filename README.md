@@ -14,7 +14,7 @@ Tested only with [jq-1.6](https://stedolan.github.io/jq/), Zsh 5.8, and bash 5.1
 Download to some location in your `$PATH` and give it permissions:
 
 ```console
-curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.1.0/mw-jwq > $HOME/.local/bin/mw-jwq
+curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.2.0/mw-jwq > $HOME/.local/bin/mw-jwq
 chmod +x $HOME/.local/bin/mw-jwq
 
 mw-jwq -h
