@@ -234,61 +234,57 @@ fixtures mw-jwq
 @test "-c quoted string with \"" {
   run ./mw-jwq -c "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
   [ $status -eq 0 ]
-  [ "${lines[0]}" = "JWT: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'" ]
-  [ "${lines[1]}" = "{" ]
-  [ "${lines[2]}" = "  \"alg\": \"HS256\"," ]
-  [ "${lines[3]}" = "  \"typ\": \"JWT\"" ]
-  [ "${lines[4]}" = "}" ]
-  [ "${lines[5]}" = "{" ]
-  [ "${lines[6]}" = "  \"sub\": \"1234567890\"," ]
-  [ "${lines[7]}" = "  \"name\": \"John Doe\"," ]
-  [ "${lines[8]}" = "  \"iat\": 1516239022" ]
-  [ "${lines[9]}" = "}" ]
+  [ "${lines[0]}" = "{" ]
+  [ "${lines[1]}" = "  \"alg\": \"HS256\"," ]
+  [ "${lines[2]}" = "  \"typ\": \"JWT\"" ]
+  [ "${lines[3]}" = "}" ]
+  [ "${lines[4]}" = "{" ]
+  [ "${lines[5]}" = "  \"sub\": \"1234567890\"," ]
+  [ "${lines[6]}" = "  \"name\": \"John Doe\"," ]
+  [ "${lines[7]}" = "  \"iat\": 1516239022" ]
+  [ "${lines[8]}" = "}" ]
 }
 
 @test "-c quoted string with '" {
   run ./mw-jwq -c 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
   [ $status -eq 0 ]
-  [ "${lines[0]}" = "JWT: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'" ]
-  [ "${lines[1]}" = "{" ]
-  [ "${lines[2]}" = "  \"alg\": \"HS256\"," ]
-  [ "${lines[3]}" = "  \"typ\": \"JWT\"" ]
-  [ "${lines[4]}" = "}" ]
-  [ "${lines[5]}" = "{" ]
-  [ "${lines[6]}" = "  \"sub\": \"1234567890\"," ]
-  [ "${lines[7]}" = "  \"name\": \"John Doe\"," ]
-  [ "${lines[8]}" = "  \"iat\": 1516239022" ]
-  [ "${lines[9]}" = "}" ]
+  [ "${lines[0]}" = "{" ]
+  [ "${lines[1]}" = "  \"alg\": \"HS256\"," ]
+  [ "${lines[2]}" = "  \"typ\": \"JWT\"" ]
+  [ "${lines[3]}" = "}" ]
+  [ "${lines[4]}" = "{" ]
+  [ "${lines[5]}" = "  \"sub\": \"1234567890\"," ]
+  [ "${lines[6]}" = "  \"name\": \"John Doe\"," ]
+  [ "${lines[7]}" = "  \"iat\": 1516239022" ]
+  [ "${lines[8]}" = "}" ]
 }
 
 @test "-c unquoted string ok" {
   run ./mw-jwq -c eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
   [ $status -eq 0 ]
-  [ "${lines[0]}" = "JWT: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'" ]
-  [ "${lines[1]}" = "{" ]
-  [ "${lines[2]}" = "  \"alg\": \"HS256\"," ]
-  [ "${lines[3]}" = "  \"typ\": \"JWT\"" ]
-  [ "${lines[4]}" = "}" ]
-  [ "${lines[5]}" = "{" ]
-  [ "${lines[6]}" = "  \"sub\": \"1234567890\"," ]
-  [ "${lines[7]}" = "  \"name\": \"John Doe\"," ]
-  [ "${lines[8]}" = "  \"iat\": 1516239022" ]
-  [ "${lines[9]}" = "}" ]
+  [ "${lines[0]}" = "{" ]
+  [ "${lines[1]}" = "  \"alg\": \"HS256\"," ]
+  [ "${lines[2]}" = "  \"typ\": \"JWT\"" ]
+  [ "${lines[3]}" = "}" ]
+  [ "${lines[4]}" = "{" ]
+  [ "${lines[5]}" = "  \"sub\": \"1234567890\"," ]
+  [ "${lines[6]}" = "  \"name\": \"John Doe\"," ]
+  [ "${lines[7]}" = "  \"iat\": 1516239022" ]
+  [ "${lines[8]}" = "}" ]
 }
 
 @test "-c string with spaces" {
   run ./mw-jwq -c eyJhbGci OiJIUzI1NiIsInR 5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0N   TY3ODkwIiwibmFtZSI6IkpvaG4g  RG9lIiwiaWF0Ij  oxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
   [ $status -eq 0 ]
-  [ "${lines[0]}" = "JWT: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'" ]
-  [ "${lines[1]}" = "{" ]
-  [ "${lines[2]}" = "  \"alg\": \"HS256\"," ]
-  [ "${lines[3]}" = "  \"typ\": \"JWT\"" ]
-  [ "${lines[4]}" = "}" ]
-  [ "${lines[5]}" = "{" ]
-  [ "${lines[6]}" = "  \"sub\": \"1234567890\"," ]
-  [ "${lines[7]}" = "  \"name\": \"John Doe\"," ]
-  [ "${lines[8]}" = "  \"iat\": 1516239022" ]
-  [ "${lines[9]}" = "}" ]
+  [ "${lines[0]}" = "{" ]
+  [ "${lines[1]}" = "  \"alg\": \"HS256\"," ]
+  [ "${lines[2]}" = "  \"typ\": \"JWT\"" ]
+  [ "${lines[3]}" = "}" ]
+  [ "${lines[4]}" = "{" ]
+  [ "${lines[5]}" = "  \"sub\": \"1234567890\"," ]
+  [ "${lines[6]}" = "  \"name\": \"John Doe\"," ]
+  [ "${lines[7]}" = "  \"iat\": 1516239022" ]
+  [ "${lines[8]}" = "}" ]
 }
 
 @test "-c string with linebreak with ending in \\" {
@@ -296,16 +292,15 @@ fixtures mw-jwq
   eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ. \
   SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
   [ $status -eq 0 ]
-  [ "${lines[0]}" = "JWT: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'" ]
-  [ "${lines[1]}" = "{" ]
-  [ "${lines[2]}" = "  \"alg\": \"HS256\"," ]
-  [ "${lines[3]}" = "  \"typ\": \"JWT\"" ]
-  [ "${lines[4]}" = "}" ]
-  [ "${lines[5]}" = "{" ]
-  [ "${lines[6]}" = "  \"sub\": \"1234567890\"," ]
-  [ "${lines[7]}" = "  \"name\": \"John Doe\"," ]
-  [ "${lines[8]}" = "  \"iat\": 1516239022" ]
-  [ "${lines[9]}" = "}" ]
+  [ "${lines[0]}" = "{" ]
+  [ "${lines[1]}" = "  \"alg\": \"HS256\"," ]
+  [ "${lines[2]}" = "  \"typ\": \"JWT\"" ]
+  [ "${lines[3]}" = "}" ]
+  [ "${lines[4]}" = "{" ]
+  [ "${lines[5]}" = "  \"sub\": \"1234567890\"," ]
+  [ "${lines[6]}" = "  \"name\": \"John Doe\"," ]
+  [ "${lines[7]}" = "  \"iat\": 1516239022" ]
+  [ "${lines[8]}" = "}" ]
 }
 
 @test "-c string with linebreak with NOT ending in \\" {
@@ -313,7 +308,7 @@ fixtures mw-jwq
   eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.
   SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
   [ $status -eq 0 ]
-  [ "${lines[1]}" = "{" ]
+  [ "${lines[0]}" = "{" ]
 }
 
 @test "-c -f second token with whitespace in header json" {
@@ -460,7 +455,7 @@ c.d.e"
 }
 
 @test "options after the string are part of the string, not options" {
-  run ./mw-jwq --color=always "$H.$P.s" -c
+  run ./mw-jwq -v --color=always "$H.$P.s" -c
   [[ "${lines[0]}" == *"JWT: '$H.$P.s-c'"* ]]
   [[ "$output" == *$'\e['* ]]
 }
@@ -507,7 +502,7 @@ c.d.e"
 }
 
 @test "backslashes in the string are echoed literally" {
-  run ./mw-jwq -c "$H.$P.s\\n"
+  run ./mw-jwq -v -c "$H.$P.s\\n"
   [ "${lines[0]}" = "JWT: '$H.$P.s\\n'" ]
 }
 
@@ -713,7 +708,7 @@ c.d.e"
   require_pty
   TERM=xterm run_pty "./mw-jwq -x"
   [[ "$output" == *$'\e[0;31mUnknown option: -x\e[0m'* ]]
-  TERM=xterm run_pty "./mw-jwq '$H.$P.s'"
+  TERM=xterm run_pty "./mw-jwq -v '$H.$P.s'"
   [[ "$output" == *$'\e[0;36mJWT: '* ]]
   TERM=xterm run_pty "./mw-jwq -h"
   [[ "$output" == *$'\e[1mUsage:\e[0m'* ]]
@@ -742,7 +737,7 @@ c.d.e"
   [[ "$output" != *$'\e['* ]]
   TERM=xterm run_pty "./mw-jwq -x 2>&1 >/dev/null | cat"
   [[ "$output" != *$'\e['* ]]
-  TERM=xterm run_pty "./mw-jwq '$H.$P.s' | cat >/dev/null"
+  TERM=xterm run_pty "./mw-jwq -v '$H.$P.s' | cat >/dev/null"
   [[ "$output" == *$'\e[0;36mJWT: '* ]]
 }
 
@@ -751,7 +746,7 @@ c.d.e"
   [[ "$output" != *$'\e['* ]]
   run ./mw-jwq -h
   [[ "$output" != *$'\e['* ]]
-  run ./mw-jwq "$H.$P.s"
+  run ./mw-jwq -v "$H.$P.s"
   [[ "${lines[0]}" == "JWT: '$H.$P.s'" ]]
 }
 
@@ -760,7 +755,7 @@ c.d.e"
   [[ "$output" == *$'\e[0;31mUnknown option: -x\e[0m'* ]]
   run ./mw-jwq --color=always -h
   [[ "$output" == *$'\e[1mUsage:\e[0m'* ]]
-  run ./mw-jwq --color=always "$H.$P.s"
+  run ./mw-jwq -v --color=always "$H.$P.s"
   [[ "${lines[0]}" == $'\e[0;36mJWT: '* ]]
 }
 
@@ -849,4 +844,30 @@ $H.$P.s"
 @test "output: -h lists -H and -p" {
   run ./mw-jwq -h
   [[ "$output" == *"--header"* && "$output" == *"--payload"* ]]
+}
+
+@test "echo: the JWT is not echoed without -v" {
+  run bash -c "./mw-jwq -c '$H.$P.s' 2>&1 >/dev/null"
+  [ $status -eq 0 ]
+  [ "$output" = "" ]
+}
+
+@test "echo: -v and -vv echo the JWT on stderr" {
+  run bash -c "./mw-jwq -v -c '$H.$P.s' 2>&1 >/dev/null"
+  [[ "$output" == *"JWT: '$H.$P.s'"* ]]
+  run bash -c "./mw-jwq -vv -c '$H.$P.s' 2>&1 >/dev/null"
+  [[ "$output" == *"JWT: '$H.$P.s'"* ]]
+}
+
+@test "echo: the JWT echo is shown before the jq command with -v" {
+  run ./mw-jwq -v -c "$H.$P.s"
+  [[ "${lines[0]}" == "JWT: '"* ]]
+  [[ "${lines[1]}" == ">>  jq"* ]]
+}
+
+@test "echo: files and stdin never echo the JWT, even with -v" {
+  run ./mw-jwq -v -c -f "$FIXTURE_ROOT/single_line.jwt"
+  [[ "$output" != *"JWT: '"* ]]
+  run bash -c "./mw-jwq -v -c < '$FIXTURE_ROOT/single_line.jwt'"
+  [[ "$output" != *"JWT: '"* ]]
 }
