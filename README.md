@@ -45,15 +45,15 @@ bats tests
  ✓ -f empty file runs w/o output
  ✓ -c -f single line file ok
  ✓ -c -f file with trailing spaces
- - -c -f file with preceding spaces (skipped: TODO: trim spaces)
- - -c -f file with spaces in between (skipped: TODO: trim spaces)
+ ✓ -c -f file with preceding spaces
+ ✓ -c -f file with spaces in between
  ✓ -c -f file with one trailing empty line
- - -c -f file with multiple trailing empty lines (skipped: TODO: trim empty lines)
- - -c -f file with preceding empty line (skipped: TODO: trim empty lines)
- - -c -f file with multiple preceding empty lines (skipped: TODO: trim empty lines)
+ ✓ -c -f file with multiple trailing empty lines
+ ✓ -c -f file with preceding empty line
+ ✓ -c -f file with multiple preceding empty lines
  ✓ -c -f file with multiple codes one per line
- - -c -f multi line code (skipped: TODO? not yet implemented)
- - -c -f file name with space ok (skipped: TODO? not yet implemented)
+ ✓ -c -f multi line code
+ ✓ -c -f file name with space ok
  ✓ -c quoted string with "
  ✓ -c quoted string with '
  ✓ -c unquoted string ok
@@ -62,12 +62,12 @@ bats tests
  ✓ -c string with linebreak with NOT ending in \
  - Test color (skipped: TODO: Cant test color, dont know the codification)
 
-24 tests, 0 failures, 8 skipped
+24 tests, 0 failures, 1 skipped
 ```
 
 ## TODO
 
-* Fix skipped tests, either implement fixes or accept defeat.
+* ~~Fix skipped tests, either implement fixes or accept defeat.~~ (only the color test remains skipped)
 * More tests:
   * Test `-v` parameter and other combinations.
   * Investigate about the color code to test without `-c` parameter
