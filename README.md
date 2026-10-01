@@ -7,14 +7,14 @@ Wrapper for decripting *JSON Web Tokens* using `jq`
 
 ## Requirements
 
-Tested only with [jq-1.6](https://stedolan.github.io/jq/), Zsh 5.8, and bash 5.1.8
+Tested with [jq](https://stedolan.github.io/jq/) 1.6, 1.7 and 1.8, and bash from 3.2 (the one macOS ships) to 5.x, on Linux and macOS (see the CI matrix).
 
 ## Install
 
 Download to some location in your `$PATH` and give it permissions:
 
 ```console
-curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.5.0/mw-jwq > $HOME/.local/bin/mw-jwq
+curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.5.1/mw-jwq > $HOME/.local/bin/mw-jwq
 chmod +x $HOME/.local/bin/mw-jwq
 
 mw-jwq -h
@@ -109,7 +109,7 @@ bats tests
  ✓ -c payload that is not JSON fails
  ✓ -c invalid base64 characters fail
  ✓ -c string without dots fails
- ✓ -c codes with only two parts fail
+ ✓ -c a single code with only two parts is decoded
  ✓ -c code with too many parts fails
  ✓ options after the string are part of the string, not options
  ✓ -- ends options
@@ -168,13 +168,13 @@ bats tests
 
 Towards 1.0.0:
 
-* Check compatibility with older bash (macOS ships 3.2; an empty array with `set -u` fails before bash 4.4) and with several `jq` versions: add a CI matrix (Ubuntu and macOS, jq 1.6 and 1.8) or declare and verify the minimum versions.
 * Decide the output format before freezing it: today header and payload are printed one after the other, with nothing separating or labeling several tokens. Maybe an option to print only the payload.
 * Decide whether the `JWT: '...'` echo on stderr stays or only shows with `-v`.
 * Document the scope and the interface: it only decodes (no signature nor expiration checks, and the README says "decripting"), the exit codes (1 usage, 5 `jq` error) and that options must come before the STRING.
 
 Done:
 
+* ~~Check compatibility with older bash (macOS ships 3.2; an empty array with `set -u` fails before bash 4.4) and with several `jq` versions: add a CI matrix (Ubuntu and macOS, jq 1.6 and 1.8) or declare and verify the minimum versions.~~ PR_LINK
 * ~~Fix skipped tests, either implement fixes or accept defeat.~~ [#1](https://github.com/juanpsm/mw-jwq/pull/1)
 * ~~More tests: `-v` and other combinations, color output without `-c`.~~ [#1](https://github.com/juanpsm/mw-jwq/pull/1), [#4](https://github.com/juanpsm/mw-jwq/pull/4)
 * ~~Multiple file support?~~ Not needed: a file (or stdin) can hold several codes, one per line. Stdin is supported instead. [#3](https://github.com/juanpsm/mw-jwq/pull/3)
