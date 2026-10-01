@@ -14,7 +14,7 @@ Tested only with [jq-1.6](https://stedolan.github.io/jq/), Zsh 5.8, and bash 5.1
 Download to some location in your `$PATH` and give it permissions:
 
 ```console
-curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.2.0/mw-jwq > $HOME/.local/bin/mw-jwq
+curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.2.1/mw-jwq > $HOME/.local/bin/mw-jwq
 chmod +x $HOME/.local/bin/mw-jwq
 
 mw-jwq -h
@@ -74,6 +74,7 @@ bats tests
  ✓ -c multi line string with several codes
  ✓ -c second code invalid: first is decoded and status is 5
  ✓ -c first code invalid: second is still decoded and status is 5
+ ✓ -c -f second code with header wrapped and using - or _
  ✓ -c payload that is not JSON fails
  ✓ -c invalid base64 characters fail
  ✓ -c string without dots fails
@@ -98,7 +99,7 @@ bats tests
  ✓ -c output has no ANSI escapes
  ✓ NO_COLOR environment variable disables color
 
-60 tests, 0 failures
+61 tests, 0 failures
 ```
 
 ## TODO
