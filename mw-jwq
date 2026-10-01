@@ -5,10 +5,11 @@
 set -Eeuo pipefail
 trap cleanup SIGINT SIGTERM ERR EXIT
 
-VERSION="0.2.1"
+VERSION="0.3.0"
 
 NO_COLOR="${NO_COLOR-}"
 FILE=''
+IMPLICIT_STDIN=''
 DEBUG=''
 RAW='split(".") | .[0],.[1] | gsub("-";"+") | gsub("_";"/") | @base64d | fromjson'
 
@@ -21,20 +22,20 @@ usage() {
 
 $(version) 
 
-Usage: $(basename "${BASH_SOURCE[0]}") [-V] [-h] [-v] [-c] ( -f FILE | STRING )
+Usage: $(basename "${BASH_SOURCE[0]}") [-V] [-h] [-v] [-c] ( -f FILE | STRING | < FILE )
 EOF
 }
 
 help() {
   cat <<EOF
 $(usage)
-Wrapper for: ( cat FILE / echo STRING ) | jq -R '${RAW}'
+Wrapper for: ( cat FILE / echo STRING / stdin ) | jq -R '${RAW}'
 
 Available options:
 
 -h,  --help           Print this help and exit
 -V,  --version        Print version and exit
--f,  --file FILE      Read JWT from FILE
+-f,  --file FILE      Read JWT from FILE ('-' for stdin)
 -c,  --no-color       Disable color output
 -v,  --verbose        Print script debug info
 -vv, --hyper-verbose  More debug info (set -x)
@@ -67,7 +68,7 @@ die() {
 }
 
 parse_params() {
-  [[ $# -eq 0 ]] && usage && exit 1
+  [[ $# -eq 0 && -t 0 ]] && usage && exit 1
 
   while :; do
     case "${1-}" in
@@ -79,7 +80,7 @@ parse_params() {
     -f  | --file)                             # named parameters
       FILE="${2-}"
       [[ -z "$FILE" ]] && die "Missing argument for option '$1'"
-      [[ ! -f "$FILE" ]] && die "File '$FILE' does not exist"
+      [[ "$FILE" != - && ! -f "$FILE" ]] && die "File '$FILE' does not exist"
       shift
       ;;
     --) shift; break ;;
@@ -95,8 +96,12 @@ parse_params() {
   local trimmed
   trimmed=$(tr -d '[:space:]' <<<"$STRING")
 
-  [[ -z "$trimmed" ]] && [[ -z "$FILE" ]] && usage && die "Missing argument: STRING or FILE"
   [[ -n "$trimmed" ]] && [[ -n "$FILE" ]] && die "Use either -f FILE or STRING, not both"
+  if [[ -z "$trimmed" ]] && [[ -z "$FILE" ]]; then
+    # Nothing given: read from a pipe or redirect, but never wait on a terminal
+    [[ -t 0 ]] && usage && die "Missing argument: STRING or FILE"
+    FILE=- IMPLICIT_STDIN=1
+  fi
 
   return 0
 }
@@ -131,6 +136,10 @@ header_starts_at() {
 
 if [ -n "$FILE" ]; then
   INPUT=$(cat -- "$FILE")
+  if [[ -n "$IMPLICIT_STDIN" && -z "$(tr -d '[:space:]' <<<"$INPUT")" ]]; then
+    usage
+    die "Missing argument: STRING or FILE"
+  fi
 else
   STRING=$(IFS= ; echo "${args[*]}")
   INPUT="$STRING"

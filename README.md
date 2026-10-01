@@ -14,7 +14,7 @@ Tested only with [jq-1.6](https://stedolan.github.io/jq/), Zsh 5.8, and bash 5.1
 Download to some location in your `$PATH` and give it permissions:
 
 ```console
-curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.2.1/mw-jwq > $HOME/.local/bin/mw-jwq
+curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.3.0/mw-jwq > $HOME/.local/bin/mw-jwq
 chmod +x $HOME/.local/bin/mw-jwq
 
 mw-jwq -h
@@ -23,6 +23,18 @@ mw-jwq -h
 ## Usage
 
 The script has it own usage and help incorporated, check it out ✌️
+
+The JWT can be given as an argument, from a file, or through stdin:
+
+```console
+mw-jwq eyJhbGciOi...
+mw-jwq -f token.jwt
+kubectl get secret my-secret -o jsonpath='{.data.token}' | base64 -d | mw-jwq
+mw-jwq < token.jwt
+mw-jwq -f - < token.jwt   # explicit stdin
+```
+
+Stdin is read when no STRING nor `-f` is given and stdin is not a terminal.
 
 ## TDD
 
@@ -98,14 +110,26 @@ bats tests
  ✓ color output has ANSI escapes when -c is not given
  ✓ -c output has no ANSI escapes
  ✓ NO_COLOR environment variable disables color
+ ✓ stdin: piped code is decoded without arguments
+ ✓ stdin: redirected file is decoded
+ ✓ stdin: -f - reads stdin
+ ✓ stdin: several codes, whitespace and wrapped lines
+ ✓ stdin: color is on when -c is not given
+ ✓ stdin: invalid code fails with status 5
+ ✓ stdin: empty input without -f shows Usage
+ ✓ stdin: whitespace only input without -f shows Usage
+ ✓ stdin: -f - with empty input runs w/o output
+ ✓ stdin: a STRING argument wins over piped data and stdin is not read
+ ✓ stdin: -f - and STRING together are rejected
+ ✓ stdin: -h mentions stdin
 
-61 tests, 0 failures
+73 tests, 0 failures
 ```
 
 ## TODO
 
 * ~~Fix skipped tests, either implement fixes or accept defeat.~~ (only the color test remains skipped)
 * ~~More tests: `-v` and other combinations, color output without `-c`.~~
-* Multiple file support?
+* ~~Multiple file support?~~ Not needed: a file (or stdin) can hold several codes, one per line. Stdin is supported instead.
 * Use more colorful help and messages. The colours are already defined! 🌈
 * ~~Add [Github Actions!!](https://docs.github.com/en/actions)~~

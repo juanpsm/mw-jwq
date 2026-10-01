@@ -3,19 +3,19 @@ load test_helper
 fixtures mw-jwq
 
 @test "invoking mw-jwq with no mandatory parameters shows Usage" {
-  run ./mw-jwq
+  run ./mw-jwq </dev/null
   [ $status -eq 1 ]
   [ $(expr "${lines[1]}" : "Usage:") -ne 0 ]
 
-  run ./mw-jwq -c
+  run ./mw-jwq -c </dev/null
   [ $status -eq 1 ]
   [ $(expr "${lines[1]}" : "Usage:") -ne 0 ]
 
-  run ./mw-jwq -v
+  run ./mw-jwq -v </dev/null
   [ $status -eq 1 ]
   [ $(expr "${lines[1]}" : "Usage:") -ne 0 ]
 
-  run ./mw-jwq -v -c
+  run ./mw-jwq -v -c </dev/null
   [ $status -eq 1 ]
   [ $(expr "${lines[1]}" : "Usage:") -ne 0 ]
 }
@@ -564,3 +564,74 @@ c.d.e"
   [[ "$output" != *$'\e['* ]]
 }
 
+@test "stdin: piped code is decoded without arguments" {
+  run bash -c "printf '%s.%s.s\n' '$H' '$P' | ./mw-jwq -c"
+  [ $status -eq 0 ]
+  [ "${lines[0]}" = "{" ]
+  [[ "$output" == *'"alg": "HS256"'* ]]
+}
+
+@test "stdin: redirected file is decoded" {
+  run ./mw-jwq -c < "$FIXTURE_ROOT/single_line.jwt"
+  [ $status -eq 0 ]
+  [[ "$output" == *'"sub": "1234567890"'* ]]
+}
+
+@test "stdin: -f - reads stdin" {
+  run bash -c "printf '%s.%s.s\n' '$H' '$P' | ./mw-jwq -c -f -"
+  [ $status -eq 0 ]
+  [[ "$output" == *'"alg": "HS256"'* ]]
+}
+
+@test "stdin: several codes, whitespace and wrapped lines" {
+  run bash -c "printf ' %s.%s.s \r\n\n%s.\n%s.s\n' '$H' '$P' '$H' '$P' | ./mw-jwq -c"
+  [ $status -eq 0 ]
+  [ "$(grep -c '"alg"' <<<"$output")" -eq 2 ]
+}
+
+@test "stdin: color is on when -c is not given" {
+  run bash -c "printf '%s.%s.s\n' '$H' '$P' | ./mw-jwq"
+  [ $status -eq 0 ]
+  [[ "$output" == *$'\e['* ]]
+}
+
+@test "stdin: invalid code fails with status 5" {
+  run bash -c "echo 'a!b.c@d.e' | ./mw-jwq -c"
+  [ $status -eq 5 ]
+}
+
+@test "stdin: empty input without -f shows Usage" {
+  run ./mw-jwq -c < /dev/null
+  [ $status -eq 1 ]
+  [[ "$output" == *"Usage:"* ]]
+  [[ "$output" == *"Missing argument"* ]]
+}
+
+@test "stdin: whitespace only input without -f shows Usage" {
+  run bash -c "printf ' \n\t\n' | ./mw-jwq -c"
+  [ $status -eq 1 ]
+  [[ "$output" == *"Missing argument"* ]]
+}
+
+@test "stdin: -f - with empty input runs w/o output" {
+  run ./mw-jwq -c -f - < /dev/null
+  [ $status -eq 0 ]
+  [ "$output" = "" ]
+}
+
+@test "stdin: a STRING argument wins over piped data and stdin is not read" {
+  run bash -c "echo 'a!b.c@d.e' | ./mw-jwq -c '$H.$P.s'"
+  [ $status -eq 0 ]
+  [[ "$output" == *'"alg": "HS256"'* ]]
+}
+
+@test "stdin: -f - and STRING together are rejected" {
+  run bash -c "echo x | ./mw-jwq -c -f - '$H.$P.s'"
+  [ $status -eq 1 ]
+  [[ "$output" == *"not both"* ]]
+}
+
+@test "stdin: -h mentions stdin" {
+  run ./mw-jwq -h
+  [[ "$output" == *"stdin"* ]]
+}
