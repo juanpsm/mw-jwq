@@ -600,18 +600,18 @@ c.d.e"
 
 @test "color: terminal gets color by default" {
   command -v script >/dev/null || skip "script(1) not available"
-  run script -qec "./mw-jwq -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  TERM=xterm run script -qec "./mw-jwq -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
   [ $status -eq 0 ]
   [[ "$output" == *$'\e['* ]]
 }
 
 @test "color: terminal with -c, --color=never, NO_COLOR or TERM=dumb has none" {
   command -v script >/dev/null || skip "script(1) not available"
-  run script -qec "./mw-jwq -c -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  TERM=xterm run script -qec "./mw-jwq -c -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
   [[ "$output" != *$'\e['* ]]
-  run script -qec "./mw-jwq --color=never -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  TERM=xterm run script -qec "./mw-jwq --color=never -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
   [[ "$output" != *$'\e['* ]]
-  NO_COLOR=1 run script -qec "./mw-jwq -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  NO_COLOR=1 TERM=xterm run script -qec "./mw-jwq -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
   [[ "$output" != *$'\e['* ]]
   TERM=dumb run script -qec "./mw-jwq -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
   [[ "$output" != *$'\e['* ]]
@@ -619,9 +619,9 @@ c.d.e"
 
 @test "color: verbose command line is colored on a terminal" {
   command -v script >/dev/null || skip "script(1) not available"
-  run script -qec "./mw-jwq -v -c -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  TERM=xterm run script -qec "./mw-jwq -v -c -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
   [[ "$output" != *$'\e['* ]]
-  run script -qec "./mw-jwq -v -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  TERM=xterm run script -qec "./mw-jwq -v -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
   [[ "$output" == *$'\e[0;32m>>'* ]]
 }
 
