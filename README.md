@@ -60,17 +60,51 @@ bats tests
  ✓ -c string with spaces
  ✓ -c string with linebreak with ending in \
  ✓ -c string with linebreak with NOT ending in \
- - Test color (skipped: TODO: Cant test color, dont know the codification)
+ ✓ -c -f second token with whitespace in header json
+ ✓ -c -f multi line code with signature line starting like a header
+ ✓ -h lists every option
+ ✓ -c base64url alphabet (- and _) is decoded
+ ✓ -c unicode payload
+ ✓ -c token without signature (trailing dot)
+ ✓ -c -f CRLF line endings
+ ✓ -c -f tabs around and inside the code
+ ✓ -c -f three codes separated by empty lines
+ ✓ -c -f file with only whitespace runs w/o output
+ ✓ -c string with only whitespace shows Usage
+ ✓ -c multi line string with several codes
+ ✓ -c second code invalid: first is decoded and status is 5
+ ✓ -c first code invalid: second is still decoded and status is 5
+ ✓ -c payload that is not JSON fails
+ ✓ -c invalid base64 characters fail
+ ✓ -c string without dots fails
+ ✓ -c codes with only two parts fail
+ ✓ -c code with too many parts fails
+ ✓ options after the string are part of the string, not options
+ ✓ -- ends options
+ ✓ -f after -c and before the file works in any order
+ ✓ -f and STRING together are rejected
+ ✓ -f directory is rejected
+ ✓ -f without argument fails
+ ✓ unknown option fails
+ ✓ shell metacharacters in the string are not executed
+ ✓ backslashes in the string are echoed literally
+ ✓ the JWT echo goes to stderr, the decoded JSON to stdout
+ ✓ -v prints the jq command
+ ✓ without -v the jq command is not printed
+ ✓ -vv traces the script
+ ✓ --verbose and --hyper-verbose are aliases
+ ✓ --no-color is an alias of -c
+ ✓ color output has ANSI escapes when -c is not given
+ ✓ -c output has no ANSI escapes
+ ✓ NO_COLOR environment variable disables color
 
-24 tests, 0 failures, 1 skipped
+60 tests, 0 failures
 ```
 
 ## TODO
 
 * ~~Fix skipped tests, either implement fixes or accept defeat.~~ (only the color test remains skipped)
-* More tests:
-  * Test `-v` parameter and other combinations.
-  * Investigate about the color code to test without `-c` parameter
+* ~~More tests: `-v` and other combinations, color output without `-c`.~~
 * Multiple file support?
 * Use more colorful help and messages. The colours are already defined! 🌈
 * ~~Add [Github Actions!!](https://docs.github.com/en/actions)~~
