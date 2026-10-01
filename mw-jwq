@@ -106,9 +106,22 @@ else
 fi
 
 # Read the input and split it into tokens. Whitespace is dropped. A token may
-# span several lines, and a new one starts at a line beginning with a header
-# (a base64url "{", i.e. "ey" or "ew") once the current one has its 3 dot
-# separated parts.
+# span several lines, and a new one starts at a line where a JWT header begins
+# once the current token has its 3 dot separated parts.
+
+# Succeeds if the lines from index $1 start with a header: the text up to the
+# first dot decodes to a JSON object. This tells a new token apart from a
+# signature wrapped onto a line that happens to start like a header.
+header_starts_at() {
+  local i=$1 text=${LINES_IN[$1]}
+  while [[ "$text" != *.* ]] && ((++i < ${#LINES_IN[@]})); do
+    text+=${LINES_IN[i]}
+  done
+  [[ "$text" == *.* ]] || return 1
+  jq -Re 'try (@base64d | fromjson | type == "object") catch false' \
+    <<<"${text%%.*}" >/dev/null 2>&1
+}
+
 if [ -n "$FILE" ]; then
   INPUT=$(cat -- "$FILE")
 else
@@ -117,17 +130,22 @@ else
   msg "JWT: '$(tr -d '[:space:]' <<<"$STRING")'"
 fi
 
-TOKENS=()
-BUFFER=''
+LINES_IN=()
 while IFS= read -r line || [[ -n "$line" ]]; do
   line=$(tr -d '[:space:]' <<<"$line")
-  [[ -z "$line" ]] && continue
-  if [[ "$BUFFER" == *.*.* && "$line" =~ ^e[wy] ]]; then
+  [[ -n "$line" ]] && LINES_IN+=("$line")
+done <<<"$INPUT"
+
+TOKENS=()
+BUFFER=''
+for i in "${!LINES_IN[@]}"; do
+  line=${LINES_IN[i]}
+  if [[ "$BUFFER" == *.*.* && "$line" =~ ^e[wy] ]] && header_starts_at "$i"; then
     TOKENS+=("$BUFFER")
     BUFFER=''
   fi
   BUFFER+="$line"
-done <<<"$INPUT"
+done
 [[ -n "$BUFFER" ]] && TOKENS+=("$BUFFER")
 
 CMD="jq -R '$RAW' $OPTIONS"

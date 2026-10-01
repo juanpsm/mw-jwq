@@ -324,6 +324,15 @@ fixtures mw-jwq
   [ "$(grep -c '"alg"' <<<"$output")" -eq 2 ]
 }
 
+@test "-c -f multi line code with signature line starting like a header" {
+  H=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+  P=eyJzdWIiOiIxMjM0NTY3ODkwIn0
+  printf '%s.%s.abcdef\neyJzaWduYXR1cmU\n%s.%s.xyz\n' "$H" "$P" "$H" "$P" > "$BATS_TEST_TMPDIR/sig_like_header.jwt"
+  run ./mw-jwq -c -f "$BATS_TEST_TMPDIR/sig_like_header.jwt"
+  [ $status -eq 0 ]
+  [ "$(grep -c '"alg"' <<<"$output")" -eq 2 ]
+}
+
 @test "Test color" {
   skip "TODO: Cant test color, dont know the codification"
   run ./mw-jwq -f "$FIXTURE_ROOT/single_line.jwt"
