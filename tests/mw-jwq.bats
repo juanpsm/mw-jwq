@@ -773,3 +773,80 @@ c.d.e"
   run ./mw-jwq --color=always -V
   [[ "$output" =~ ^mw-jwq\ v[0-9.]+$ ]]
 }
+
+@test "output: -H prints only the header" {
+  run ./mw-jwq -c -H "$H.$P.s"
+  [ $status -eq 0 ]
+  [[ "$output" == *'"alg": "HS256"'* ]]
+  [[ "$output" != *'"sub"'* ]]
+}
+
+@test "output: -p prints only the payload" {
+  run ./mw-jwq -c -p "$H.$P.s"
+  [ $status -eq 0 ]
+  [[ "$output" == *'"sub": "1234567890"'* ]]
+  [[ "$output" != *'"alg"'* ]]
+}
+
+@test "output: --header and --payload are aliases" {
+  run ./mw-jwq -c --header "$H.$P.s"
+  [[ "$output" == *'"alg"'* && "$output" != *'"sub"'* ]]
+  run ./mw-jwq -c --payload "$H.$P.s"
+  [[ "$output" == *'"sub"'* && "$output" != *'"alg"'* ]]
+}
+
+@test "output: -H and -p together print both, as without them" {
+  run ./mw-jwq -c -H -p "$H.$P.s"
+  [ $status -eq 0 ]
+  [[ "$output" == *'"alg"'* && "$output" == *'"sub"'* ]]
+  run bash -c "./mw-jwq -c -H -p '$H.$P.s' 2>/dev/null"
+  both="$output"
+  run bash -c "./mw-jwq -c '$H.$P.s' 2>/dev/null"
+  [ "$output" = "$both" ]
+}
+
+@test "output: -p with several codes prints one payload per code" {
+  run ./mw-jwq -c -p "$H.$P.s
+$H.$P.s
+$H.$P.s"
+  [ $status -eq 0 ]
+  [ "$(grep -c '"sub"' <<<"$output")" -eq 3 ]
+  [ "$(grep -c '"alg"' <<<"$output")" -eq 0 ]
+}
+
+@test "output: -H with several codes prints one header per code" {
+  run ./mw-jwq -c -H -f "$FIXTURE_ROOT/two.jwt"
+  [ $status -eq 0 ]
+  [ "$(grep -c '"alg"' <<<"$output")" -eq 2 ]
+  [ "$(grep -c '"sub"' <<<"$output")" -eq 0 ]
+}
+
+@test "output: -p works with a file and with stdin" {
+  run ./mw-jwq -c -p -f "$FIXTURE_ROOT/single_line.jwt"
+  [[ "$output" == *'"sub"'* && "$output" != *'"alg"'* ]]
+  run bash -c "./mw-jwq -c -p < '$FIXTURE_ROOT/single_line.jwt'"
+  [[ "$output" == *'"sub"'* && "$output" != *'"alg"'* ]]
+}
+
+@test "output: -p output can be piped to jq" {
+  run bash -c "./mw-jwq -p '$H.$P.s' 2>/dev/null | jq -r .sub"
+  [ $status -eq 0 ]
+  [ "$output" = "1234567890" ]
+}
+
+@test "output: -p still fails on an invalid code" {
+  run ./mw-jwq -c -p 'a!b.c@d.e'
+  [ $status -eq 5 ]
+}
+
+@test "output: -v shows the selected part in the jq command" {
+  run ./mw-jwq -v -c -p "$H.$P.s"
+  [[ "$output" == *"| .[1] |"* ]]
+  run ./mw-jwq -v -c -H "$H.$P.s"
+  [[ "$output" == *"| .[0] |"* ]]
+}
+
+@test "output: -h lists -H and -p" {
+  run ./mw-jwq -h
+  [[ "$output" == *"--header"* && "$output" == *"--payload"* ]]
+}
