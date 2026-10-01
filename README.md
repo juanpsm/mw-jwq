@@ -14,7 +14,7 @@ Tested with [jq](https://stedolan.github.io/jq/) 1.6, 1.7 and 1.8, and bash from
 Download to some location in your `$PATH` and give it permissions:
 
 ```console
-curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.5.1/mw-jwq > $HOME/.local/bin/mw-jwq
+curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.6.0/mw-jwq > $HOME/.local/bin/mw-jwq
 chmod +x $HOME/.local/bin/mw-jwq
 
 mw-jwq -h
@@ -35,6 +35,19 @@ mw-jwq -f - < token.jwt   # explicit stdin
 ```
 
 Stdin is read when no STRING nor `-f` is given and stdin is not a terminal.
+
+### Output
+
+For each code the header is printed first and then the payload, both as
+pretty-printed JSON. Use `-p`/`--payload` or `-H`/`--header` to print only one
+of them for every code:
+
+```console
+mw-jwq -p $TOKEN | jq -r .sub
+mw-jwq -H -f tokens.jwt
+```
+
+With both options, or none, both parts are printed.
 
 ### Color
 
@@ -160,20 +173,31 @@ bats tests
  ✓ messages: --color=always colors errors, usage and the JWT echo
  ✓ messages: --color=never keeps messages plain
  ✓ messages: -V is never colored
+ ✓ output: -H prints only the header
+ ✓ output: -p prints only the payload
+ ✓ output: --header and --payload are aliases
+ ✓ output: -H and -p together print both, as without them
+ ✓ output: -p with several codes prints one payload per code
+ ✓ output: -H with several codes prints one header per code
+ ✓ output: -p works with a file and with stdin
+ ✓ output: -p output can be piped to jq
+ ✓ output: -p still fails on an invalid code
+ ✓ output: -v shows the selected part in the jq command
+ ✓ output: -h lists -H and -p
 
-92 tests, 0 failures
+103 tests, 0 failures
 ```
 
 ## TODO
 
 Towards 1.0.0:
 
-* Decide the output format before freezing it: today header and payload are printed one after the other, with nothing separating or labeling several tokens. Maybe an option to print only the payload.
 * Decide whether the `JWT: '...'` echo on stderr stays or only shows with `-v`.
 * Document the scope and the interface: it only decodes (no signature nor expiration checks, and the README says "decripting"), the exit codes (1 usage, 5 `jq` error) and that options must come before the STRING.
 
 Done:
 
+* ~~Decide the output format before freezing it: today header and payload are printed one after the other, with nothing separating or labeling several tokens. Maybe an option to print only the payload.~~ The default stays as is (header, then payload, for each code) and `-H`/`--header` and `-p`/`--payload` select one part. [#7](https://github.com/juanpsm/mw-jwq/pull/7)
 * ~~Check compatibility with older bash (macOS ships 3.2; an empty array with `set -u` fails before bash 4.4) and with several `jq` versions: add a CI matrix (Ubuntu and macOS, jq 1.6 and 1.8) or declare and verify the minimum versions.~~ [#6](https://github.com/juanpsm/mw-jwq/pull/6)
 * ~~Fix skipped tests, either implement fixes or accept defeat.~~ [#1](https://github.com/juanpsm/mw-jwq/pull/1)
 * ~~More tests: `-v` and other combinations, color output without `-c`.~~ [#1](https://github.com/juanpsm/mw-jwq/pull/1), [#4](https://github.com/juanpsm/mw-jwq/pull/4)

@@ -5,14 +5,18 @@
 set -Eeuo pipefail
 trap cleanup SIGINT SIGTERM ERR EXIT
 
-VERSION="0.5.1"
+VERSION="0.6.0"
 
 COLOR_MODE=auto # auto | always | never
 NOFORMAT='' RED='' GREEN='' ORANGE='' BLUE='' PURPLE='' CYAN='' YELLOW='' BOLD='' ENDB=''
 FILE=''
 IMPLICIT_STDIN=''
+WANT_HEADER=''
+WANT_PAYLOAD=''
 DEBUG=''
-RAW='split(".") | .[0],.[1] | gsub("-";"+") | gsub("_";"/") | @base64d | fromjson'
+PARTS='.[0],.[1]' # .[0] is the header, .[1] the payload
+RAW_TAIL='gsub("-";"+") | gsub("_";"/") | @base64d | fromjson'
+RAW="split(\".\") | $PARTS | $RAW_TAIL"
 
 version() {
   echo "mw-jwq v$VERSION"
@@ -37,6 +41,8 @@ ${BOLD}Available options:${ENDB}
 -h,  --help           Print this help and exit
 -V,  --version        Print version and exit
 -f,  --file FILE      Read JWT from FILE ('-' for stdin)
+-H,  --header         Print only the header of each JWT
+-p,  --payload        Print only the payload of each JWT
     --color[=WHEN]    Color output: auto (default), always or never
 -c,  --no-color       Same as --color=never
 -v,  --verbose        Print script debug info
@@ -100,6 +106,8 @@ parse_params() {
     -h  | --help) help ; exit 0 ;;
     -v  | --verbose) DEBUG=1 ;;               # flags
     -vv | --hyper-verbose) DEBUG=1; set -x ;; 
+    -H  | --header) WANT_HEADER=1 ;;
+    -p  | --payload) WANT_PAYLOAD=1 ;;
     -c  | --no-color) set_color_mode never ;;
     --color) set_color_mode always ;;
     --color=*)
@@ -196,6 +204,14 @@ done
 for token in ${TOKENS[@]+"${TOKENS[@]}"}; do
   [[ "$token" == *.*.*.* ]] && die "Invalid token (too many parts): '$token'" 5
 done
+
+# With just one of -H and -p only that part is printed; with both, or none, both.
+if [[ -n "$WANT_HEADER" && -z "$WANT_PAYLOAD" ]]; then
+  PARTS='.[0]'
+elif [[ -z "$WANT_HEADER" && -n "$WANT_PAYLOAD" ]]; then
+  PARTS='.[1]'
+fi
+RAW="split(\".\") | $PARTS | $RAW_TAIL"
 
 CMD="jq -R '$RAW' $OPTIONS"
 
