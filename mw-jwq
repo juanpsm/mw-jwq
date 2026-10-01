@@ -5,7 +5,7 @@
 set -Eeuo pipefail
 trap cleanup SIGINT SIGTERM ERR EXIT
 
-VERSION="0.6.0"
+VERSION="0.7.0"
 
 COLOR_MODE=auto # auto | always | never
 NOFORMAT='' RED='' GREEN='' ORANGE='' BLUE='' PURPLE='' CYAN='' YELLOW='' BOLD='' ENDB=''
@@ -45,7 +45,7 @@ ${BOLD}Available options:${ENDB}
 -p,  --payload        Print only the payload of each JWT
     --color[=WHEN]    Color output: auto (default), always or never
 -c,  --no-color       Same as --color=never
--v,  --verbose        Print script debug info
+-v,  --verbose        Print script debug info (the JWT given as STRING and the jq command)
 -vv, --hyper-verbose  More debug info (set -x)
 
 EOF
@@ -180,7 +180,7 @@ if [ -n "$FILE" ]; then
 else
   STRING=$(IFS= ; echo "${args[*]-}")
   INPUT="$STRING"
-  msg "${CYAN}JWT: '$(tr -d '[:space:]' <<<"$STRING")'${NOFORMAT}"
+  [[ -n "$DEBUG" ]] && msg "${CYAN}JWT: '$(tr -d '[:space:]' <<<"$STRING")'${NOFORMAT}"
 fi
 
 LINES_IN=()
