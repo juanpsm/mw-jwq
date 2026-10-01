@@ -318,7 +318,7 @@ fixtures mw-jwq
 
 @test "-c -f second token with whitespace in header json" {
   printf 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.abc\n%s.eyJzdWIiOiIxMjM0NTY3ODkwIn0.abc\n' \
-    "$(printf '{ "alg":"HS256"}' | base64 -w0 | tr '+/' '-_' | tr -d =)" > "$BATS_TEST_TMPDIR/spaced_header.jwt"
+    "$(b64url '{ "alg":"HS256"}')" > "$BATS_TEST_TMPDIR/spaced_header.jwt"
   run ./mw-jwq -c -f "$BATS_TEST_TMPDIR/spaced_header.jwt"
   [ $status -eq 0 ]
   [ "$(grep -c '"alg"' <<<"$output")" -eq 2 ]
@@ -338,7 +338,7 @@ P=eyJzdWIiOiIxMjM0NTY3ODkwIn0
 B64URL_UNSAFE='{"a":"??>>~~"}'
 
 b64url() {
-  printf '%s' "$1" | base64 -w0 | tr '+/' '-_' | tr -d =
+  printf '%s' "$1" | base64 | tr -d '\n=' | tr '+/' '-_'
 }
 
 @test "-h lists every option" {
@@ -445,10 +445,11 @@ $H.$P.s"
   [ $status -eq 5 ]
 }
 
-@test "-c codes with only two parts fail" {
-  run ./mw-jwq -c "$H.$P
-$H.$P"
-  [ $status -eq 5 ]
+@test "-c a single code with only two parts is decoded" {
+  run ./mw-jwq -c "$H.$P"
+  [ $status -eq 0 ]
+  [[ "$output" == *'"alg"'* ]]
+  [[ "$output" == *'"sub"'* ]]
 }
 
 @test "-c code with too many parts fails" {
@@ -599,29 +600,29 @@ c.d.e"
 }
 
 @test "color: terminal gets color by default" {
-  command -v script >/dev/null || skip "script(1) not available"
-  TERM=xterm run script -qec "./mw-jwq -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  require_pty
+  TERM=xterm run_pty "./mw-jwq -f '$FIXTURE_ROOT/single_line.jwt'"
   [ $status -eq 0 ]
   [[ "$output" == *$'\e['* ]]
 }
 
 @test "color: terminal with -c, --color=never, NO_COLOR or TERM=dumb has none" {
-  command -v script >/dev/null || skip "script(1) not available"
-  TERM=xterm run script -qec "./mw-jwq -c -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  require_pty
+  TERM=xterm run_pty "./mw-jwq -c -f '$FIXTURE_ROOT/single_line.jwt'"
   [[ "$output" != *$'\e['* ]]
-  TERM=xterm run script -qec "./mw-jwq --color=never -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  TERM=xterm run_pty "./mw-jwq --color=never -f '$FIXTURE_ROOT/single_line.jwt'"
   [[ "$output" != *$'\e['* ]]
-  NO_COLOR=1 TERM=xterm run script -qec "./mw-jwq -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  NO_COLOR=1 TERM=xterm run_pty "./mw-jwq -f '$FIXTURE_ROOT/single_line.jwt'"
   [[ "$output" != *$'\e['* ]]
-  TERM=dumb run script -qec "./mw-jwq -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  TERM=dumb run_pty "./mw-jwq -f '$FIXTURE_ROOT/single_line.jwt'"
   [[ "$output" != *$'\e['* ]]
 }
 
 @test "color: verbose command line is colored on a terminal" {
-  command -v script >/dev/null || skip "script(1) not available"
-  TERM=xterm run script -qec "./mw-jwq -v -c -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  require_pty
+  TERM=xterm run_pty "./mw-jwq -v -c -f '$FIXTURE_ROOT/single_line.jwt'"
   [[ "$output" != *$'\e['* ]]
-  TERM=xterm run script -qec "./mw-jwq -v -f '$FIXTURE_ROOT/single_line.jwt'" /dev/null
+  TERM=xterm run_pty "./mw-jwq -v -f '$FIXTURE_ROOT/single_line.jwt'"
   [[ "$output" == *$'\e[0;32m>>'* ]]
 }
 
@@ -709,39 +710,39 @@ c.d.e"
 }
 
 @test "messages: errors are red, the JWT echo is cyan and usage is bold on a terminal" {
-  command -v script >/dev/null || skip "script(1) not available"
-  TERM=xterm run script -qec "./mw-jwq -x" /dev/null
+  require_pty
+  TERM=xterm run_pty "./mw-jwq -x"
   [[ "$output" == *$'\e[0;31mUnknown option: -x\e[0m'* ]]
-  TERM=xterm run script -qec "./mw-jwq '$H.$P.s'" /dev/null
+  TERM=xterm run_pty "./mw-jwq '$H.$P.s'"
   [[ "$output" == *$'\e[0;36mJWT: '* ]]
-  TERM=xterm run script -qec "./mw-jwq -h" /dev/null
+  TERM=xterm run_pty "./mw-jwq -h"
   [[ "$output" == *$'\e[1mUsage:\e[0m'* ]]
   [[ "$output" == *$'\e[1mAvailable options:\e[0m'* ]]
 }
 
 @test "messages: usage on a terminal with no arguments is bold" {
-  command -v script >/dev/null || skip "script(1) not available"
-  TERM=xterm run script -qec "./mw-jwq" /dev/null
+  require_pty
+  TERM=xterm run_pty "./mw-jwq"
   [[ "$output" == *$'\e[1mUsage:\e[0m'* ]]
 }
 
 @test "messages: no color on a terminal with -c, NO_COLOR or TERM=dumb" {
-  command -v script >/dev/null || skip "script(1) not available"
-  TERM=xterm run script -qec "./mw-jwq -c -x" /dev/null
+  require_pty
+  TERM=xterm run_pty "./mw-jwq -c -x"
   [[ "$output" != *$'\e['* ]]
-  NO_COLOR=1 TERM=xterm run script -qec "./mw-jwq -h" /dev/null
+  NO_COLOR=1 TERM=xterm run_pty "./mw-jwq -h"
   [[ "$output" != *$'\e['* ]]
-  TERM=dumb run script -qec "./mw-jwq '$H.$P.s'" /dev/null
+  TERM=dumb run_pty "./mw-jwq '$H.$P.s'"
   [[ "$output" != *$'\e['* ]]
 }
 
 @test "messages: help piped from a terminal has no bold, stderr still colored" {
-  command -v script >/dev/null || skip "script(1) not available"
-  TERM=xterm run script -qec "./mw-jwq -h | cat" /dev/null
+  require_pty
+  TERM=xterm run_pty "./mw-jwq -h | cat"
   [[ "$output" != *$'\e['* ]]
-  TERM=xterm run script -qec "./mw-jwq -x 2>&1 >/dev/null | cat" /dev/null
+  TERM=xterm run_pty "./mw-jwq -x 2>&1 >/dev/null | cat"
   [[ "$output" != *$'\e['* ]]
-  TERM=xterm run script -qec "./mw-jwq '$H.$P.s' | cat >/dev/null" /dev/null
+  TERM=xterm run_pty "./mw-jwq '$H.$P.s' | cat >/dev/null"
   [[ "$output" == *$'\e[0;36mJWT: '* ]]
 }
 
