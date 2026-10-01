@@ -14,7 +14,7 @@ Tested with [jq](https://stedolan.github.io/jq/) 1.6, 1.7 and 1.8, and bash from
 Download to some location in your `$PATH` and give it permissions:
 
 ```console
-curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.7.1/mw-jwq > $HOME/.local/bin/mw-jwq
+curl -L https://github.com/juanpsm/mw-jwq/releases/download/1.0.0/mw-jwq > $HOME/.local/bin/mw-jwq
 chmod +x $HOME/.local/bin/mw-jwq
 
 mw-jwq -h
@@ -100,6 +100,12 @@ color in `auto` mode, and the last of `-c` and `--color` wins.
 The script's own messages follow the same rules: errors are red and, with
 `-v`, the `JWT: '...'` line is cyan on stderr, and the usage and help headings
 are bold on stdout, each one only when that stream is a terminal.
+
+## Versioning
+
+From 1.0.0 the options, the exit codes and the output format follow
+[semantic versioning](https://semver.org): they only change in an incompatible
+way in a new major version.
 
 ## TDD
 
