@@ -3,7 +3,7 @@
 
 # mw-jwq
 
-Wrapper for decripting *JSON Web Tokens* using `jq`
+Wrapper for decoding *JSON Web Tokens* using `jq`
 
 ## Requirements
 
@@ -19,6 +19,13 @@ chmod +x $HOME/.local/bin/mw-jwq
 
 mw-jwq -h
 ```
+
+## Scope
+
+`mw-jwq` only decodes: it prints the header and the payload of a JWT. It does
+not verify the signature, does not check `exp`, `nbf` or any other claim, and
+does not decrypt encrypted tokens (JWE). Never trust a token just because it
+decodes.
 
 ## Usage
 
@@ -36,6 +43,20 @@ mw-jwq -f - < token.jwt   # explicit stdin
 
 Stdin is read when no STRING nor `-f` is given and stdin is not a terminal.
 
+Options go before the STRING: anything after it is taken as part of the code
+(`mw-jwq TOKEN -c` decodes the code `TOKEN-c`). Use `--` to end the options.
+
+### Input
+
+Spaces, tabs, CRLF line endings and empty lines are ignored, and a code can be
+wrapped over several lines. A file, stdin or a multi-line STRING can hold
+several codes, one after the other. When there is more than one, every code
+must have its three parts, with an empty signature as `HEADER.PAYLOAD.` if it
+has none; a single code with only two parts is decoded too.
+
+Nothing is printed on stderr by default. With `-v` the code given as STRING and
+the `jq` command are printed there, and `-vv` also traces the script.
+
 ### Output
 
 For each code the header is printed first and then the payload, both as
@@ -48,6 +69,17 @@ mw-jwq -H -f tokens.jwt
 ```
 
 With both options, or none, both parts are printed.
+
+### Exit codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | Everything was decoded (or there was nothing to decode: an empty file or stdin given with `-f`) |
+| 1 | Wrong usage: missing or unknown option, missing or unreadable file, `-f` together with a STRING, or no input |
+| 5 | A code could not be decoded: invalid base64 or JSON, or more than three parts |
+
+With several codes, every one is decoded and the exit status is the first
+error.
 
 ### Color
 
@@ -64,15 +96,15 @@ mw-jwq --color=never $TOKEN      # same as -c / --no-color
 means `always`. The `NO_COLOR` environment variable and `TERM=dumb` disable
 color in `auto` mode, and the last of `-c` and `--color` wins.
 
-The script's own messages follow the same rules: errors are red and the
-`JWT: '...'` line is cyan on stderr, and the usage and help headings are bold
-on stdout, each one only when that stream is a terminal.
+The script's own messages follow the same rules: errors are red and, with
+`-v`, the `JWT: '...'` line is cyan on stderr, and the usage and help headings
+are bold on stdout, each one only when that stream is a terminal.
 
 ## TDD
 
-This script was tested with [bats](https://github.com/sstephenson/bats). To run them, first install it
-[following their instructions](https://github.com/sstephenson/bats#installing-bats-from-source),
-then:
+This script was tested with [bats-core](https://github.com/bats-core/bats-core). To run them, first install it
+[following their instructions](https://bats-core.readthedocs.io/en/stable/installation.html),
+then (`tests/docker/Dockerfile` builds an image to run them on an old bash):
 
 ```console
 git clone https://github.com/juanpsm/mw-jwq.git
@@ -194,12 +226,11 @@ bats tests
 
 ## TODO
 
-Towards 1.0.0:
-
-* Document the scope and the interface: it only decodes (no signature nor expiration checks, and the README says "decripting"), the exit codes (1 usage, 5 `jq` error) and that options must come before the STRING.
+Nothing pending.
 
 Done:
 
+* ~~Document the scope and the interface: it only decodes (no signature nor expiration checks, and the README says "decripting"), the exit codes (1 usage, 5 `jq` error) and that options must come before the STRING.~~ [#9](https://github.com/juanpsm/mw-jwq/pull/9)
 * ~~Decide whether the `JWT: '...'` echo on stderr stays or only shows with `-v`.~~ It only shows with `-v`, so stderr is quiet by default. [#8](https://github.com/juanpsm/mw-jwq/pull/8)
 * ~~Decide the output format before freezing it: today header and payload are printed one after the other, with nothing separating or labeling several tokens. Maybe an option to print only the payload.~~ The default stays as is (header, then payload, for each code) and `-H`/`--header` and `-p`/`--payload` select one part. [#7](https://github.com/juanpsm/mw-jwq/pull/7)
 * ~~Check compatibility with older bash (macOS ships 3.2; an empty array with `set -u` fails before bash 4.4) and with several `jq` versions: add a CI matrix (Ubuntu and macOS, jq 1.6 and 1.8) or declare and verify the minimum versions.~~ [#6](https://github.com/juanpsm/mw-jwq/pull/6)
