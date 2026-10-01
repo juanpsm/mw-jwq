@@ -14,7 +14,7 @@ Tested with [jq](https://stedolan.github.io/jq/) 1.6, 1.7 and 1.8, and bash from
 Download to some location in your `$PATH` and give it permissions:
 
 ```console
-curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.6.0/mw-jwq > $HOME/.local/bin/mw-jwq
+curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.7.0/mw-jwq > $HOME/.local/bin/mw-jwq
 chmod +x $HOME/.local/bin/mw-jwq
 
 mw-jwq -h
@@ -184,19 +184,23 @@ bats tests
  ✓ output: -p still fails on an invalid code
  ✓ output: -v shows the selected part in the jq command
  ✓ output: -h lists -H and -p
+ ✓ echo: the JWT is not echoed without -v
+ ✓ echo: -v and -vv echo the JWT on stderr
+ ✓ echo: the JWT echo is shown before the jq command with -v
+ ✓ echo: files and stdin never echo the JWT, even with -v
 
-103 tests, 0 failures
+107 tests, 0 failures
 ```
 
 ## TODO
 
 Towards 1.0.0:
 
-* Decide whether the `JWT: '...'` echo on stderr stays or only shows with `-v`.
 * Document the scope and the interface: it only decodes (no signature nor expiration checks, and the README says "decripting"), the exit codes (1 usage, 5 `jq` error) and that options must come before the STRING.
 
 Done:
 
+* ~~Decide whether the `JWT: '...'` echo on stderr stays or only shows with `-v`.~~ It only shows with `-v`, so stderr is quiet by default. [#8](https://github.com/juanpsm/mw-jwq/pull/8)
 * ~~Decide the output format before freezing it: today header and payload are printed one after the other, with nothing separating or labeling several tokens. Maybe an option to print only the payload.~~ The default stays as is (header, then payload, for each code) and `-H`/`--header` and `-p`/`--payload` select one part. [#7](https://github.com/juanpsm/mw-jwq/pull/7)
 * ~~Check compatibility with older bash (macOS ships 3.2; an empty array with `set -u` fails before bash 4.4) and with several `jq` versions: add a CI matrix (Ubuntu and macOS, jq 1.6 and 1.8) or declare and verify the minimum versions.~~ [#6](https://github.com/juanpsm/mw-jwq/pull/6)
 * ~~Fix skipped tests, either implement fixes or accept defeat.~~ [#1](https://github.com/juanpsm/mw-jwq/pull/1)
