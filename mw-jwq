@@ -125,7 +125,7 @@ header_starts_at() {
     text+=${LINES_IN[i]}
   done
   [[ "$text" == *.* ]] || return 1
-  jq -Re 'try (@base64d | fromjson | type == "object") catch false' \
+  jq -Re 'try (gsub("-";"+") | gsub("_";"/") | @base64d | fromjson | type == "object") catch false' \
     <<<"${text%%.*}" >/dev/null 2>&1
 }
 

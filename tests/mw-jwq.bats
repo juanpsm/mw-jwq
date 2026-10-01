@@ -421,6 +421,15 @@ $H.$P.s"
   [[ "$output" == *'"alg"'* ]]
 }
 
+@test "-c -f second code with header wrapped and using - or _" {
+  HDR=$(b64url "$B64URL_UNSAFE")
+  printf '%s.%s.s\n%s\n%s.%s.s\n' "$H" "$P" "${HDR:0:5}" "${HDR:5}" "$P" > "$BATS_TEST_TMPDIR/wrapped.jwt"
+  run ./mw-jwq -c -f "$BATS_TEST_TMPDIR/wrapped.jwt"
+  [ $status -eq 0 ]
+  [[ "$output" == *'"alg"'* ]]
+  [[ "$output" == *'"a": "??>>~~"'* ]]
+}
+
 @test "-c payload that is not JSON fails" {
   run ./mw-jwq -c "$H.$(b64url 'notjson').s"
   [ $status -eq 5 ]
