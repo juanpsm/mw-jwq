@@ -174,7 +174,7 @@ Towards 1.0.0:
 
 Done:
 
-* ~~Check compatibility with older bash (macOS ships 3.2; an empty array with `set -u` fails before bash 4.4) and with several `jq` versions: add a CI matrix (Ubuntu and macOS, jq 1.6 and 1.8) or declare and verify the minimum versions.~~ PR_LINK
+* ~~Check compatibility with older bash (macOS ships 3.2; an empty array with `set -u` fails before bash 4.4) and with several `jq` versions: add a CI matrix (Ubuntu and macOS, jq 1.6 and 1.8) or declare and verify the minimum versions.~~ [#6](https://github.com/juanpsm/mw-jwq/pull/6)
 * ~~Fix skipped tests, either implement fixes or accept defeat.~~ [#1](https://github.com/juanpsm/mw-jwq/pull/1)
 * ~~More tests: `-v` and other combinations, color output without `-c`.~~ [#1](https://github.com/juanpsm/mw-jwq/pull/1), [#4](https://github.com/juanpsm/mw-jwq/pull/4)
 * ~~Multiple file support?~~ Not needed: a file (or stdin) can hold several codes, one per line. Stdin is supported instead. [#3](https://github.com/juanpsm/mw-jwq/pull/3)
