@@ -166,8 +166,17 @@ bats tests
 
 ## TODO
 
-* ~~Fix skipped tests, either implement fixes or accept defeat.~~
-* ~~More tests: `-v` and other combinations, color output without `-c`.~~
-* ~~Multiple file support?~~ Not needed: a file (or stdin) can hold several codes, one per line. Stdin is supported instead.
-* ~~Use more colorful help and messages. The colours are already defined! 🌈~~
-* ~~Add [Github Actions!!](https://docs.github.com/en/actions)~~
+Towards 1.0.0:
+
+* Check compatibility with older bash (macOS ships 3.2; an empty array with `set -u` fails before bash 4.4) and with several `jq` versions: add a CI matrix (Ubuntu and macOS, jq 1.6 and 1.8) or declare and verify the minimum versions.
+* Decide the output format before freezing it: today header and payload are printed one after the other, with nothing separating or labeling several tokens. Maybe an option to print only the payload.
+* Decide whether the `JWT: '...'` echo on stderr stays or only shows with `-v`.
+* Document the scope and the interface: it only decodes (no signature nor expiration checks, and the README says "decripting"), the exit codes (1 usage, 5 `jq` error) and that options must come before the STRING.
+
+Done:
+
+* ~~Fix skipped tests, either implement fixes or accept defeat.~~ [#1](https://github.com/juanpsm/mw-jwq/pull/1)
+* ~~More tests: `-v` and other combinations, color output without `-c`.~~ [#1](https://github.com/juanpsm/mw-jwq/pull/1), [#4](https://github.com/juanpsm/mw-jwq/pull/4)
+* ~~Multiple file support?~~ Not needed: a file (or stdin) can hold several codes, one per line. Stdin is supported instead. [#3](https://github.com/juanpsm/mw-jwq/pull/3)
+* ~~Use more colorful help and messages. The colours are already defined! 🌈~~ [#4](https://github.com/juanpsm/mw-jwq/pull/4), [#5](https://github.com/juanpsm/mw-jwq/pull/5)
+* ~~Add [Github Actions!!](https://docs.github.com/en/actions)~~ [e05c21e](https://github.com/juanpsm/mw-jwq/commit/e05c21e), [#1](https://github.com/juanpsm/mw-jwq/pull/1)
