@@ -5,7 +5,7 @@
 set -Eeuo pipefail
 trap cleanup SIGINT SIGTERM ERR EXIT
 
-VERSION="0.5.0"
+VERSION="0.5.1"
 
 COLOR_MODE=auto # auto | always | never
 NOFORMAT='' RED='' GREEN='' ORANGE='' BLUE='' PURPLE='' CYAN='' YELLOW='' BOLD='' ENDB=''
@@ -120,7 +120,7 @@ parse_params() {
   done
 
   args=("$@")
-  STRING=$(IFS= ; echo "${args[*]}")
+  STRING=$(IFS= ; echo "${args[*]-}")
 
   local trimmed
   trimmed=$(tr -d '[:space:]' <<<"$STRING")
@@ -170,7 +170,7 @@ if [ -n "$FILE" ]; then
     die "Missing argument: STRING or FILE"
   fi
 else
-  STRING=$(IFS= ; echo "${args[*]}")
+  STRING=$(IFS= ; echo "${args[*]-}")
   INPUT="$STRING"
   msg "${CYAN}JWT: '$(tr -d '[:space:]' <<<"$STRING")'${NOFORMAT}"
 fi
@@ -183,7 +183,7 @@ done <<<"$INPUT"
 
 TOKENS=()
 BUFFER=''
-for i in "${!LINES_IN[@]}"; do
+for i in ${LINES_IN[@]+"${!LINES_IN[@]}"}; do
   line=${LINES_IN[i]}
   if [[ "$BUFFER" == *.*.* ]] && { [[ "$line" == *.* ]] || { [[ "$line" =~ ^e[wy] ]] && header_starts_at "$i"; }; }; then
     TOKENS+=("$BUFFER")
@@ -193,7 +193,7 @@ for i in "${!LINES_IN[@]}"; do
 done
 [[ -n "$BUFFER" ]] && TOKENS+=("$BUFFER")
 
-for token in "${TOKENS[@]}"; do
+for token in ${TOKENS[@]+"${TOKENS[@]}"}; do
   [[ "$token" == *.*.*.* ]] && die "Invalid token (too many parts): '$token'" 5
 done
 
@@ -206,7 +206,7 @@ fi
 # jq exits with the status of its last input only, so run it once per token and
 # keep the first failure.
 STATUS=0
-for token in "${TOKENS[@]}"; do
+for token in ${TOKENS[@]+"${TOKENS[@]}"}; do
   rc=0
   printf '%s\n' "$token" | jq -R "$RAW" $OPTIONS || rc=$?
   if [[ $STATUS -eq 0 ]]; then STATUS=$rc; fi
