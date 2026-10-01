@@ -460,7 +460,7 @@ c.d.e"
 
 @test "options after the string are part of the string, not options" {
   run ./mw-jwq --color=always "$H.$P.s" -c
-  [ "${lines[0]}" = "JWT: '$H.$P.s-c'" ]
+  [[ "${lines[0]}" == *"JWT: '$H.$P.s-c'"* ]]
   [[ "$output" == *$'\e['* ]]
 }
 
@@ -706,4 +706,69 @@ c.d.e"
 @test "stdin: -h mentions stdin" {
   run ./mw-jwq -h
   [[ "$output" == *"stdin"* ]]
+}
+
+@test "messages: errors are red, the JWT echo is cyan and usage is bold on a terminal" {
+  command -v script >/dev/null || skip "script(1) not available"
+  TERM=xterm run script -qec "./mw-jwq -x" /dev/null
+  [[ "$output" == *$'\e[0;31mUnknown option: -x\e[0m'* ]]
+  TERM=xterm run script -qec "./mw-jwq '$H.$P.s'" /dev/null
+  [[ "$output" == *$'\e[0;36mJWT: '* ]]
+  TERM=xterm run script -qec "./mw-jwq -h" /dev/null
+  [[ "$output" == *$'\e[1mUsage:\e[0m'* ]]
+  [[ "$output" == *$'\e[1mAvailable options:\e[0m'* ]]
+}
+
+@test "messages: usage on a terminal with no arguments is bold" {
+  command -v script >/dev/null || skip "script(1) not available"
+  TERM=xterm run script -qec "./mw-jwq" /dev/null
+  [[ "$output" == *$'\e[1mUsage:\e[0m'* ]]
+}
+
+@test "messages: no color on a terminal with -c, NO_COLOR or TERM=dumb" {
+  command -v script >/dev/null || skip "script(1) not available"
+  TERM=xterm run script -qec "./mw-jwq -c -x" /dev/null
+  [[ "$output" != *$'\e['* ]]
+  NO_COLOR=1 TERM=xterm run script -qec "./mw-jwq -h" /dev/null
+  [[ "$output" != *$'\e['* ]]
+  TERM=dumb run script -qec "./mw-jwq '$H.$P.s'" /dev/null
+  [[ "$output" != *$'\e['* ]]
+}
+
+@test "messages: help piped from a terminal has no bold, stderr still colored" {
+  command -v script >/dev/null || skip "script(1) not available"
+  TERM=xterm run script -qec "./mw-jwq -h | cat" /dev/null
+  [[ "$output" != *$'\e['* ]]
+  TERM=xterm run script -qec "./mw-jwq -x 2>&1 >/dev/null | cat" /dev/null
+  [[ "$output" != *$'\e['* ]]
+  TERM=xterm run script -qec "./mw-jwq '$H.$P.s' | cat >/dev/null" /dev/null
+  [[ "$output" == *$'\e[0;36mJWT: '* ]]
+}
+
+@test "messages: plain without a terminal" {
+  run ./mw-jwq -x
+  [[ "$output" != *$'\e['* ]]
+  run ./mw-jwq -h
+  [[ "$output" != *$'\e['* ]]
+  run ./mw-jwq "$H.$P.s"
+  [[ "${lines[0]}" == "JWT: '$H.$P.s'" ]]
+}
+
+@test "messages: --color=always colors errors, usage and the JWT echo" {
+  run ./mw-jwq --color=always -x
+  [[ "$output" == *$'\e[0;31mUnknown option: -x\e[0m'* ]]
+  run ./mw-jwq --color=always -h
+  [[ "$output" == *$'\e[1mUsage:\e[0m'* ]]
+  run ./mw-jwq --color=always "$H.$P.s"
+  [[ "${lines[0]}" == $'\e[0;36mJWT: '* ]]
+}
+
+@test "messages: --color=never keeps messages plain" {
+  run ./mw-jwq --color=never -x
+  [ "$output" = "Unknown option: -x" ]
+}
+
+@test "messages: -V is never colored" {
+  run ./mw-jwq --color=always -V
+  [[ "$output" =~ ^mw-jwq\ v[0-9.]+$ ]]
 }
