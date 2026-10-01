@@ -14,7 +14,7 @@ Tested only with [jq-1.6](https://stedolan.github.io/jq/), Zsh 5.8, and bash 5.1
 Download to some location in your `$PATH` and give it permissions:
 
 ```console
-curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.3.0/mw-jwq > $HOME/.local/bin/mw-jwq
+curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.4.0/mw-jwq > $HOME/.local/bin/mw-jwq
 chmod +x $HOME/.local/bin/mw-jwq
 
 mw-jwq -h
@@ -35,6 +35,21 @@ mw-jwq -f - < token.jwt   # explicit stdin
 ```
 
 Stdin is read when no STRING nor `-f` is given and stdin is not a terminal.
+
+### Color
+
+The JSON is colored only when the output is a terminal, so piping into other
+tools just works:
+
+```console
+mw-jwq $TOKEN | jq .sub          # no color codes in the pipe
+mw-jwq --color=always $TOKEN | less -R
+mw-jwq --color=never $TOKEN      # same as -c / --no-color
+```
+
+`--color[=WHEN]` takes `auto` (default), `always` or `never`; a bare `--color`
+means `always`. The `NO_COLOR` environment variable and `TERM=dumb` disable
+color in `auto` mode, and the last of `-c` and `--color` wins.
 
 ## TDD
 
@@ -107,14 +122,25 @@ bats tests
  ✓ -vv traces the script
  ✓ --verbose and --hyper-verbose are aliases
  ✓ --no-color is an alias of -c
- ✓ color output has ANSI escapes when -c is not given
+ ✓ color: auto (default) has no ANSI escapes when stdout is not a terminal
+ ✓ color: piped output can be consumed by jq without -c
+ ✓ color: --color=always has ANSI escapes even when piped
+ ✓ color: --color without a value means always
+ ✓ color: --color=auto behaves as the default
+ ✓ color: --color=never has no ANSI escapes
+ ✓ color: invalid --color value fails
+ ✓ color: the last of -c and --color wins
+ ✓ color: --color=always overrides NO_COLOR
+ ✓ color: terminal gets color by default
+ ✓ color: terminal with -c, --color=never, NO_COLOR or TERM=dumb has none
+ ✓ color: verbose command line is colored on a terminal
  ✓ -c output has no ANSI escapes
- ✓ NO_COLOR environment variable disables color
+ ✓ NO_COLOR is honored in auto mode without a terminal too
  ✓ stdin: piped code is decoded without arguments
  ✓ stdin: redirected file is decoded
  ✓ stdin: -f - reads stdin
  ✓ stdin: several codes, whitespace and wrapped lines
- ✓ stdin: color is on when -c is not given
+ ✓ stdin: --color=always colors the output
  ✓ stdin: invalid code fails with status 5
  ✓ stdin: empty input without -f shows Usage
  ✓ stdin: whitespace only input without -f shows Usage
@@ -123,7 +149,7 @@ bats tests
  ✓ stdin: -f - and STRING together are rejected
  ✓ stdin: -h mentions stdin
 
-73 tests, 0 failures
+84 tests, 0 failures
 ```
 
 ## TODO
