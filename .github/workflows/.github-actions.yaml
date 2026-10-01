@@ -2,11 +2,13 @@ name: GitHub Actions Demo
 on: [push]
 jobs:
   Run-Tests:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
       - name: Install bats
-        run: git clone https://github.com/sstephenson/bats.git && cd bats && ./install.sh $HOME/.local
+        run: |
+          git clone --depth 1 --branch v1.14.0 https://github.com/bats-core/bats-core.git
+          sudo ./bats-core/install.sh /usr/local
       - name: Run tests
         run: bats ${{ github.workspace }}/tests
