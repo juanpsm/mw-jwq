@@ -14,7 +14,7 @@ Tested with [jq](https://stedolan.github.io/jq/) 1.6, 1.7 and 1.8, and bash from
 Download to some location in your `$PATH` and give it permissions:
 
 ```console
-curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.7.0/mw-jwq > $HOME/.local/bin/mw-jwq
+curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.7.1/mw-jwq > $HOME/.local/bin/mw-jwq
 chmod +x $HOME/.local/bin/mw-jwq
 
 mw-jwq -h
@@ -39,6 +39,7 @@ mw-jwq -f token.jwt
 kubectl get secret my-secret -o jsonpath='{.data.token}' | base64 -d | mw-jwq
 mw-jwq < token.jwt
 mw-jwq -f - < token.jwt   # explicit stdin
+mw-jwq -f <(pass show token)   # any readable file, such as a process substitution
 ```
 
 Stdin is read when no STRING nor `-f` is given and stdin is not a terminal.
@@ -220,8 +221,12 @@ bats tests
  ✓ echo: -v and -vv echo the JWT on stderr
  ✓ echo: the JWT echo is shown before the jq command with -v
  ✓ echo: files and stdin never echo the JWT, even with -v
+ ✓ -f accepts process substitution
+ ✓ -f accepts /dev/stdin and /dev/null
+ ✓ -f directory says it is a directory
+ ✓ -f unreadable file says it is not readable
 
-107 tests, 0 failures
+111 tests, 0 failures
 ```
 
 ## TODO
