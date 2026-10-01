@@ -14,7 +14,7 @@ Tested only with [jq-1.6](https://stedolan.github.io/jq/), Zsh 5.8, and bash 5.1
 Download to some location in your `$PATH` and give it permissions:
 
 ```console
-curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.4.0/mw-jwq > $HOME/.local/bin/mw-jwq
+curl -L https://github.com/juanpsm/mw-jwq/releases/download/0.5.0/mw-jwq > $HOME/.local/bin/mw-jwq
 chmod +x $HOME/.local/bin/mw-jwq
 
 mw-jwq -h
@@ -50,6 +50,10 @@ mw-jwq --color=never $TOKEN      # same as -c / --no-color
 `--color[=WHEN]` takes `auto` (default), `always` or `never`; a bare `--color`
 means `always`. The `NO_COLOR` environment variable and `TERM=dumb` disable
 color in `auto` mode, and the last of `-c` and `--color` wins.
+
+The script's own messages follow the same rules: errors are red and the
+`JWT: '...'` line is cyan on stderr, and the usage and help headings are bold
+on stdout, each one only when that stream is a terminal.
 
 ## TDD
 
@@ -148,14 +152,22 @@ bats tests
  ✓ stdin: a STRING argument wins over piped data and stdin is not read
  ✓ stdin: -f - and STRING together are rejected
  ✓ stdin: -h mentions stdin
+ ✓ messages: errors are red, the JWT echo is cyan and usage is bold on a terminal
+ ✓ messages: usage on a terminal with no arguments is bold
+ ✓ messages: no color on a terminal with -c, NO_COLOR or TERM=dumb
+ ✓ messages: help piped from a terminal has no bold, stderr still colored
+ ✓ messages: plain without a terminal
+ ✓ messages: --color=always colors errors, usage and the JWT echo
+ ✓ messages: --color=never keeps messages plain
+ ✓ messages: -V is never colored
 
-84 tests, 0 failures
+92 tests, 0 failures
 ```
 
 ## TODO
 
-* ~~Fix skipped tests, either implement fixes or accept defeat.~~ (only the color test remains skipped)
+* ~~Fix skipped tests, either implement fixes or accept defeat.~~
 * ~~More tests: `-v` and other combinations, color output without `-c`.~~
 * ~~Multiple file support?~~ Not needed: a file (or stdin) can hold several codes, one per line. Stdin is supported instead.
-* Use more colorful help and messages. The colours are already defined! 🌈
+* ~~Use more colorful help and messages. The colours are already defined! 🌈~~
 * ~~Add [Github Actions!!](https://docs.github.com/en/actions)~~
